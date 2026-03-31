@@ -37,64 +37,90 @@
 </nav>
 
 <div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card bg-success text-white shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title opacity-75">Доходы за месяц</h5>
-                    <h2 th:text="${totalIncome != null ? totalIncome : '0.00'} + ' BYN'">0.00 BYN</h2>
+
+    <div sec:authorize="hasAnyRole('OWNER', 'CLIENT')">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card bg-success text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title opacity-75">Доходы за месяц</h5>
+                        <h2 th:text="${totalIncome != null ? totalIncome : '0.00'} + ' BYN'">0.00 BYN</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-danger text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title opacity-75">Расходы за месяц</h5>
+                        <h2 th:text="${totalExpense != null ? totalExpense : '0.00'} + ' BYN'">0.00 BYN</h2>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card bg-danger text-white shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title opacity-75">Расходы за месяц</h5>
-                    <h2 th:text="${totalExpense != null ? totalExpense : '0.00'} + ' BYN'">0.00 BYN</h2>
-                </div>
+
+        <h4>Мои транзакции</h4>
+        <a th:href="@{/transactions/new}"
+           class="btn btn-success mb-3">+ Добавить расход</a>
+
+        <table class="table table-striped bg-white shadow-sm rounded">
+            <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Категория</th>
+                <th>Описание</th>
+                <th>Сумма</th>
+                <th>Попутчики</th>
+                <th>Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="t : ${transactions}">
+                <td th:text="${#temporals.format(t.createdAt, 'dd.MM.yyyy HH:mm')}"></td>
+                <td th:text="${t.category != null ? t.category.name : (t.type.name() == 'INCOME' ? 'Доход (Пополнение)' : 'Перевод')}">Категория</td>
+                <td th:text="${t.description}"></td>
+                <td th:classappend="${t.type.name() == 'INCOME'} ? 'text-success fw-bold' : 'text-danger'"
+                    th:text="${t.type.name() == 'INCOME' ? '+' : '-'} + ${t.amount} + ' BYN'">Сумма
+                </td>
+                <td>
+                    <span th:each="c, i : ${t.companions}">
+                        <span th:text="${c.username}"></span>
+                        <span th:if="${!i.last}">, </span>
+                    </span>
+                </td>
+                <td>
+                    <a th:href="@{/transactions/edit/{id}(id=${t.id})}"
+                       class="btn btn-sm btn-warning">Изменить</a>
+                    <form method="post"
+                          th:action="@{/transactions/delete/{id}(id=${t.id})}"
+                          class="d-inline">
+                        <button class="btn btn-sm btn-danger">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${transactions == null or transactions.isEmpty()}">
+                <td colspan="6" class="text-center text-muted py-3">Транзакций пока нет</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div sec:authorize="hasRole('MANAGER')" class="text-center py-5">
+        <div class="card shadow-sm p-5 bg-white border-0">
+            <div class="mb-4">
+                <span style="font-size: 4rem;">🛠️</span>
+            </div>
+            <h1 class="fw-bold">Панель администратора</h1>
+            <p class="text-muted fs-5">Добро пожаловать в систему управления расходами.<br>
+                Используйте быстрые ссылки ниже или верхнее меню для работы.</p>
+
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <a th:href="@{/family}" class="btn btn-primary btn-lg px-4">Управление семьями</a>
+                <a th:href="@{/accounts}" class="btn btn-success btn-lg px-4">Валюты системы</a>
+                <a th:href="@{/categories}" class="btn btn-info text-white btn-lg px-4">Системные категории</a>
             </div>
         </div>
     </div>
-    <h4>Мои транзакции</h4>
-    <a th:href="@{/transactions/new}"
-       class="btn btn-success mb-3">+ Добавить расход</a>
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Дата</th>
-            <th>Категория</th>
-            <th>Описание</th>
-            <th>Сумма</th>
-            <th>Попутчики</th>
-            <th>Действия</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="t : ${transactions}">
-            <td th:text="${#temporals.format(t.createdAt, 'dd.MM.yyyy HH:mm')}"></td>
-            <td th:text="${t.category != null ? t.category.name : (t.type.name() == 'INCOME' ? 'Доход (Пополнение)' : 'Перевод')}">Категория</td>
-            <td th:text="${t.description}"></td>
-            <td th:classappend="${t.type.name() == 'INCOME'} ? 'text-success fw-bold' : 'text-danger'"
-                th:text="${t.type.name() == 'INCOME' ? '+' : '-'} + ${t.amount} + ' BYN'">Сумма
-            </td>
-            <td>
-                <span th:each="c, i : ${t.companions}">
-                    <span th:text="${c.username}"></span>
-                    <span th:if="${!i.last}">, </span>
-                </span>
-            </td>
-            <td>
-                <a th:href="@{/transactions/edit/{id}(id=${t.id})}"
-                   class="btn btn-sm btn-warning">Изменить</a>
-                <form method="post"
-                      th:action="@{/transactions/delete/{id}(id=${t.id})}"
-                      class="d-inline">
-                    <button class="btn btn-sm btn-danger">Удалить</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+
 </div>
 </body>
 </html>
