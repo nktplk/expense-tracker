@@ -12,6 +12,7 @@ public interface TransactionService {
     void deleteById(Long id);
     Transaction findById(Long id);
     List<Transaction> findByUserAndPeriod(User user, LocalDateTime from, LocalDateTime to);
+    List<Transaction> findVisibleTransactions(User user);
 
 
 }

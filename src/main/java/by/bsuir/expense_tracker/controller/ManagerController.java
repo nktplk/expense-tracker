@@ -1,5 +1,6 @@
 package by.bsuir.expense_tracker.controller;
 
+import by.bsuir.expense_tracker.service.FamilyService;
 import by.bsuir.expense_tracker.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class ManagerController {
 
     private final UserService userService;
+    private final FamilyService familyService;
 
     @GetMapping("/users")
     public String users(Model model) {
@@ -31,5 +33,11 @@ public class ManagerController {
     public String changeRole(@PathVariable Long id, @RequestParam String role) {
         userService.changeRole(id, role);
         return "redirect:/manager/users";
+    }
+
+    @PostMapping("/family/{id}/delete")
+    public String deleteFamily(@PathVariable Long id) {
+        familyService.deleteFamilyById(id);
+        return "redirect:/family";
     }
 }

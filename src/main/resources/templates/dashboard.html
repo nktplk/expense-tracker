@@ -14,6 +14,8 @@
         <div class="ms-auto">
             <span class="text-white me-3" th:text="${user.username}">Username</span>
 
+            <a th:href="@{/family}" class="btn btn-warning btn-sm me-2">Моя семья</a>
+
             <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')"
                th:href="@{/categories}"
                class="btn btn-outline-light btn-sm me-2">Категории</a>

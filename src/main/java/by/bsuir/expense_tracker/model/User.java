@@ -31,4 +31,8 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Transaction> transactions;
+
+    @ManyToOne
+    @JoinColumn(name = "family_id")
+    private Family family;
 }

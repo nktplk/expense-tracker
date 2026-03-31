@@ -65,4 +65,16 @@ public class UserServiceImpl implements UserService {
         user.setRole(Role.valueOf(role));
         userRepository.save(user);
     }
+
+    @Override
+    public User findById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+    }
+
+    @Override
+    public List<User> findUsersWithoutFamily() {
+        // Ищем только Клиентов, у которых еще нет семьи
+        return userRepository.findByFamilyIsNullAndRole(Role.CLIENT);
+    }
 }

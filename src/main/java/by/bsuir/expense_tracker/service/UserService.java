@@ -10,4 +10,6 @@ public interface UserService {
     List<User> findAll();
     void toggleEnabled(Long userId);
     void changeRole(Long userId, String role);
+    User findById(Long id);
+    List<User> findUsersWithoutFamily();
 }
