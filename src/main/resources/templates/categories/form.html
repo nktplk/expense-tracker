@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Категория</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <h3 th:text="${category.id != null} ? 'Редактировать' : 'Новая категория'"></h3>
+            <form method="post"
+                  th:action="${category.id != null} ? @{/categories/edit/{id}(id=${category.id})} : @{/categories/save}">
+                <div class="mb-3">
+                    <label class="form-label">Название</label>
+                    <input type="text" name="name" th:value="${category.name}"
+                           class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Месячный лимит (BYN)</label>
+                    <input type="number" step="0.01" name="monthlyLimit"
+                           th:value="${category.monthlyLimit}" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-success w-100">Сохранить</button>
+                <a th:href="@{/categories}" class="btn btn-secondary w-100 mt-2">Отмена</a>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
