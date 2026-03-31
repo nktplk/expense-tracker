@@ -1,5 +1,7 @@
 package by.bsuir.expense_tracker.controller;
 
+import by.bsuir.expense_tracker.model.Currency;
+import by.bsuir.expense_tracker.repository.CurrencyRepository;
 import by.bsuir.expense_tracker.service.FamilyService;
 import by.bsuir.expense_tracker.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ public class ManagerController {
 
     private final UserService userService;
     private final FamilyService familyService;
+    private final CurrencyRepository currencyRepository;
 
     @GetMapping("/users")
     public String users(Model model) {
@@ -40,4 +43,6 @@ public class ManagerController {
         familyService.deleteFamilyById(id);
         return "redirect:/family";
     }
+
+
 }

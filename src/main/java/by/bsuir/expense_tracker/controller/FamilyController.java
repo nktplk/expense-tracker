@@ -36,15 +36,25 @@ public class FamilyController {
 
             // Если ОВНЕР, показываем ему траты всей семьи
             if (user.getRole() == Role.OWNER) {
-                List<User> members = user.getFamily().getMembers();
-                // Для таблицы
-                model.addAttribute("familyTransactions", transactionService.findByUsers(members));
-
                 // Для суммы за месяц
                 java.time.LocalDateTime startOfMonth = java.time.LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
-                java.math.BigDecimal famTotal = transactionService.findByUsersAndPeriod(members, startOfMonth, java.time.LocalDateTime.now())
-                        .stream().map(by.bsuir.expense_tracker.model.Transaction::getAmount).reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
-                model.addAttribute("familyTotal", famTotal);
+                List<by.bsuir.expense_tracker.model.Transaction> famTransactions = transactionService.findByUsersAndPeriod(user.getFamily().getMembers(), startOfMonth, java.time.LocalDateTime.now());
+
+                // Расходы семьи
+                java.math.BigDecimal famExpenseTotal = famTransactions.stream()
+                        .filter(t -> t.getType() == by.bsuir.expense_tracker.model.enums.TransactionType.EXPENSE)
+                        .map(by.bsuir.expense_tracker.model.Transaction::getAmount)
+                        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+                // Доходы семьи
+                java.math.BigDecimal famIncomeTotal = famTransactions.stream()
+                        .filter(t -> t.getType() == by.bsuir.expense_tracker.model.enums.TransactionType.INCOME)
+                        .map(by.bsuir.expense_tracker.model.Transaction::getAmount)
+                        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+                model.addAttribute("familyTotal", famExpenseTotal); // Оставляем для обратной совместимости
+                model.addAttribute("familyExpenseTotal", famExpenseTotal);
+                model.addAttribute("familyIncomeTotal", famIncomeTotal);
             }
         }
 

@@ -28,7 +28,7 @@ public class Transaction {
     private User user;               // кто создал
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "category_id", nullable = true)
     private Category category;
 
     // попутчики — другие участники расхода
@@ -44,4 +44,15 @@ public class Transaction {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
+
+    @Enumerated(EnumType.STRING)
+    private by.bsuir.expense_tracker.model.enums.TransactionType type = by.bsuir.expense_tracker.model.enums.TransactionType.EXPENSE; // По умолчанию расход
+
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account; // Счет, с которого списали (или на который зачислили)
+
+    @ManyToOne
+    @JoinColumn(name = "target_account_id")
+    private Account targetAccount; // Используется ТОЛЬКО для переводов (куда ушли деньги)
 }

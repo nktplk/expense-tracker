@@ -16,6 +16,8 @@
 
             <a th:href="@{/family}" class="btn btn-warning btn-sm me-2">Моя семья</a>
 
+            <a th:href="@{/accounts}" class="btn btn-success btn-sm me-2">Счета и Переводы</a>
+
             <a th:href="@{/categories}"
                class="btn btn-outline-light btn-sm me-2">Категории</a>
 
@@ -35,12 +37,20 @@
 </nav>
 
 <div class="container mt-4">
-    <div class="row mb-3">
-        <div class="col-md-4">
-            <div class="card text-white bg-primary">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card bg-success text-white shadow-sm h-100">
                 <div class="card-body">
-                    <h6 class="card-title">Расходы за месяц</h6>
-                    <h2 class="card-text" th:text="${monthTotal} + ' BYN'"></h2>
+                    <h5 class="card-title opacity-75">Доходы за месяц</h5>
+                    <h2 th:text="${totalIncome != null ? totalIncome : '0.00'} + ' BYN'">0.00 BYN</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-danger text-white shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title opacity-75">Расходы за месяц</h5>
+                    <h2 th:text="${totalExpense != null ? totalExpense : '0.00'} + ' BYN'">0.00 BYN</h2>
                 </div>
             </div>
         </div>
@@ -62,9 +72,11 @@
         <tbody>
         <tr th:each="t : ${transactions}">
             <td th:text="${#temporals.format(t.createdAt, 'dd.MM.yyyy HH:mm')}"></td>
-            <td th:text="${t.category.name}"></td>
+            <td th:text="${t.category != null ? t.category.name : (t.type.name() == 'INCOME' ? 'Доход (Пополнение)' : 'Перевод')}">Категория</td>
             <td th:text="${t.description}"></td>
-            <td th:text="${t.amount} + ' BYN'"></td>
+            <td th:classappend="${t.type.name() == 'INCOME'} ? 'text-success fw-bold' : 'text-danger'"
+                th:text="${t.type.name() == 'INCOME' ? '+' : '-'} + ${t.amount} + ' BYN'">Сумма
+            </td>
             <td>
                 <span th:each="c, i : ${t.companions}">
                     <span th:text="${c.username}"></span>
