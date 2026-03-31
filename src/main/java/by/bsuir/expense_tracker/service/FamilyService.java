@@ -17,4 +17,6 @@ public interface FamilyService {
     void deleteFamilyById(Long id);
     void removeMember(Long memberId, User owner);
     void saveFamily(Family family);
+    void promoteToCoOwner(Long memberId, User requester);
+    void demoteToClient(Long memberId, User requester);
 }

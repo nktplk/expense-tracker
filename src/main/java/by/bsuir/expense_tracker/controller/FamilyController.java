@@ -124,11 +124,42 @@ public class FamilyController {
         return "redirect:/family";
     }
 
-    // Владелец удаляет клиента из семьи
+    // Владелец (или Совладелец/Менеджер) удаляет участника из семьи
     @PostMapping("/remove/{memberId}")
-    public String removeMember(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long memberId) {
-        User owner = userService.findByUsername(userDetails.getUsername());
-        familyService.removeMember(memberId, owner);
+    public String removeMember(@AuthenticationPrincipal UserDetails userDetails,
+                               @PathVariable Long memberId,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            // Тот, кто нажал кнопку "Исключить" (requester)
+            User requester = userService.findByUsername(userDetails.getUsername());
+            familyService.removeMember(memberId, requester);
+        } catch (RuntimeException e) {
+            // Если сервис запретил удаление (например, Совладелец пытается удалить Создателя),
+            // ловим ошибку и выводим её на экран красным блоком
+            redirectAttributes.addFlashAttribute("inviteError", e.getMessage());
+        }
+        return "redirect:/family";
+    }
+
+    @PostMapping("/promote/{memberId}")
+    public String promoteMember(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long memberId, RedirectAttributes redirectAttributes) {
+        try {
+            User requester = userService.findByUsername(userDetails.getUsername());
+            familyService.promoteToCoOwner(memberId, requester);
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("inviteError", e.getMessage());
+        }
+        return "redirect:/family";
+    }
+
+    @PostMapping("/demote/{memberId}")
+    public String demoteMember(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long memberId, RedirectAttributes redirectAttributes) {
+        try {
+            User requester = userService.findByUsername(userDetails.getUsername());
+            familyService.demoteToClient(memberId, requester);
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("inviteError", e.getMessage());
+        }
         return "redirect:/family";
     }
 }

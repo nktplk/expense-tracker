@@ -67,17 +67,29 @@
                     <span class="badge bg-light text-dark" th:text="'Участников: ' + ${family.members.size()}"></span>
                 </div>
                 <div class="card-body">
-                    <h5>Состав семьи:</h5><ul class="list-group mb-4">
+                    <h5>Состав семьи:</h5><<ul class="list-group mb-4">
                     <li class="list-group-item d-flex justify-content-between align-items-center" th:each="member : ${family.members}">
                         <div>
                             <span th:text="${member.username}" class="fw-bold">Имя</span>
+
                             <span class="badge bg-primary ms-2" th:if="${member.id == family.owner.id}">Создатель</span>
+                            <span class="badge bg-info text-dark ms-2" th:if="${member.id != family.owner.id and member.role.name() == 'OWNER'}">Совладелец</span>
+                            <span class="badge bg-secondary ms-2" th:if="${member.role.name() == 'CLIENT'}">Участник</span>
                         </div>
 
-                        <div th:if="${user.role.name() == 'OWNER' and member.id != family.owner.id}">
-                            <form method="post" th:action="@{/family/remove/{id}(id=${member.id})}">
-                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('Исключить пользователя из семьи?')">Исключить</button>
+                        <div class="d-flex gap-2">
+                            <th:block th:if="${user.id == family.owner.id and member.id != family.owner.id}">
+                                <form th:if="${member.role.name() == 'CLIENT'}" method="post" th:action="@{/family/promote/{id}(id=${member.id})}">
+                                    <button class="btn btn-sm btn-outline-success">Сделать совладельцем</button>
+                                </form>
+                                <form th:if="${member.role.name() == 'OWNER'}" method="post" th:action="@{/family/demote/{id}(id=${member.id})}">
+                                    <button class="btn btn-sm btn-outline-warning text-dark">Разжаловать</button>
+                                </form>
+                            </th:block>
+
+                            <form method="post" th:action="@{/family/remove/{id}(id=${member.id})}"
+                                  th:if="${member.id != family.owner.id and (user.id == family.owner.id or (user.role.name() == 'OWNER' and member.role.name() == 'CLIENT') or user.role.name() == 'MANAGER')}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Исключить пользователя из семьи?')">Исключить</button>
                             </form>
                         </div>
                     </li>

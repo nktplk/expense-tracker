@@ -85,12 +85,14 @@ public class FamilyServiceImpl implements FamilyService {
     public void leaveFamily(User user) {
         if (user.getFamily() == null) return;
 
-        // Если выходит Владелец, то логично распустить семью (для курсовой это самый простой вариант)
         if (user.getId().equals(user.getFamily().getOwner().getId())) {
             deleteFamilyById(user.getFamily().getId());
         } else {
-            // Обычный участник просто выходит
             user.setFamily(null);
+            // Если Совладелец уходит сам, он снова становится обычным Клиентом
+            if (user.getRole() == by.bsuir.expense_tracker.model.enums.Role.OWNER) {
+                user.setRole(by.bsuir.expense_tracker.model.enums.Role.CLIENT);
+            }
             userRepository.save(user);
         }
     }
@@ -127,17 +129,68 @@ public class FamilyServiceImpl implements FamilyService {
     @Override
     @Transactional
     public void removeMember(Long memberId, User requester) {
-        User member = userRepository.findById(memberId).orElseThrow();
-        // Разрешаем удалять, если просит Менеджер ИЛИ это Овнер семьи
-        if (requester.getRole() == by.bsuir.expense_tracker.model.enums.Role.MANAGER ||
-                (member.getFamily() != null && member.getFamily().getOwner().getId().equals(requester.getId()))) {
-            member.setFamily(null);
-            userRepository.save(member);
+        User target = userRepository.findById(memberId).orElseThrow();
+        Family family = target.getFamily();
+        if (family == null) return;
+
+        boolean canRemove = false;
+
+        if (requester.getRole() == by.bsuir.expense_tracker.model.enums.Role.MANAGER) {
+            canRemove = true;
+        } else if (family.getOwner().getId().equals(requester.getId())) {
+            canRemove = true; // Создатель может удалить кого угодно
+        } else if (requester.getRole() == by.bsuir.expense_tracker.model.enums.Role.OWNER) {
+            // Если удаляет СОВЛАДЕЛЕЦ
+            if (target.getId().equals(family.getOwner().getId())) {
+                throw new RuntimeException("Нельзя исключить создателя семьи.");
+            }
+            if (target.getRole() == by.bsuir.expense_tracker.model.enums.Role.OWNER) {
+                throw new RuntimeException("Нельзя исключить другого совладельца.");
+            }
+            canRemove = true; // Совладелец может удалить обычного CLIENT
+        }
+
+        if (canRemove) {
+            target.setFamily(null);
+            // Если выгнали Совладельца, забираем у него права OWNER
+            if (target.getRole() == by.bsuir.expense_tracker.model.enums.Role.OWNER && !target.getId().equals(family.getOwner().getId())) {
+                target.setRole(by.bsuir.expense_tracker.model.enums.Role.CLIENT);
+            }
+            userRepository.save(target);
         }
     }
 
     @Override
     public void saveFamily(Family family) {
         familyRepository.save(family);
+    }
+
+    @Override
+    @Transactional
+    public void promoteToCoOwner(Long memberId, User requester) {
+        User target = userRepository.findById(memberId).orElseThrow();
+        Family family = target.getFamily();
+
+        // Только физический Создатель семьи может раздавать права Совладельца
+        if (family != null && family.getOwner().getId().equals(requester.getId())) {
+            target.setRole(by.bsuir.expense_tracker.model.enums.Role.OWNER);
+            userRepository.save(target);
+        } else {
+            throw new RuntimeException("Только создатель семьи может назначать совладельцев.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void demoteToClient(Long memberId, User requester) {
+        User target = userRepository.findById(memberId).orElseThrow();
+        Family family = target.getFamily();
+
+        if (family != null && family.getOwner().getId().equals(requester.getId())) {
+            target.setRole(by.bsuir.expense_tracker.model.enums.Role.CLIENT);
+            userRepository.save(target);
+        } else {
+            throw new RuntimeException("Только создатель семьи может понижать совладельцев.");
+        }
     }
 }
