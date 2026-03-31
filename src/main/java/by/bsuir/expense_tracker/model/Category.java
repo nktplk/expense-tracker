@@ -21,4 +21,7 @@ public class Category {
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;           // null = системная категория, иначе — личная
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted = false; // По умолчанию категория активна
 }
