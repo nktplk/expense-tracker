@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     List<Transaction> findByUserOrderByCreatedAtDesc(User user);
-    List<Transaction> findByUserAndCreatedAtBetween(
-            User user, LocalDateTime from, LocalDateTime to
-    );
+    List<Transaction> findByUserAndCreatedAtBetween(User user, java.time.LocalDateTime from, java.time.LocalDateTime to);
+    // Для поиска по всей семье
     List<Transaction> findByUserInOrderByCreatedAtDesc(List<User> users);
+    List<Transaction> findByUserInAndCreatedAtBetween(List<User> users, java.time.LocalDateTime from, java.time.LocalDateTime to);
 }

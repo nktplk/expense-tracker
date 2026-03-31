@@ -23,8 +23,7 @@ public class DashboardController {
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         User user = userService.findByUsername(userDetails.getUsername());
-        var transactions = transactionService.findVisibleTransactions(user);
-
+        var transactions = transactionService.findByUser(user);
         // Сумма за текущий месяц
         LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
         BigDecimal monthTotal = transactionService

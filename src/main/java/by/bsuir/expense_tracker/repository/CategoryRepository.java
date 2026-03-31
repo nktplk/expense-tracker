@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-    // системные категории (owner = null) + личные пользователя
-    List<Category> findByOwnerIsNullOrOwner(User owner);
+    List<Category> findByOwnerIsNull(); // Системные
+    List<Category> findByOwnerIn(List<User> owners); // Личные (семьи)
 }

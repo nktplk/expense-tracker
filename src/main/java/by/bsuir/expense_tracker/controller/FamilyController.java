@@ -3,6 +3,7 @@ package by.bsuir.expense_tracker.controller;
 import by.bsuir.expense_tracker.model.User;
 import by.bsuir.expense_tracker.model.enums.Role;
 import by.bsuir.expense_tracker.service.FamilyService;
+import by.bsuir.expense_tracker.service.TransactionService;
 import by.bsuir.expense_tracker.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,6 +11,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.util.List;
 
 @Controller
 @RequestMapping("/family")
@@ -18,6 +24,7 @@ public class FamilyController {
 
     private final FamilyService familyService;
     private final UserService userService;
+    private final TransactionService transactionService;
 
     @GetMapping
     public String familyPage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
@@ -26,19 +33,33 @@ public class FamilyController {
 
         if (user.getFamily() != null) {
             model.addAttribute("family", user.getFamily());
+
+            // Если ОВНЕР, показываем ему траты всей семьи
+            if (user.getRole() == Role.OWNER) {
+                List<User> members = user.getFamily().getMembers();
+                // Для таблицы
+                model.addAttribute("familyTransactions", transactionService.findByUsers(members));
+
+                // Для суммы за месяц
+                java.time.LocalDateTime startOfMonth = java.time.LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+                java.math.BigDecimal famTotal = transactionService.findByUsersAndPeriod(members, startOfMonth, java.time.LocalDateTime.now())
+                        .stream().map(by.bsuir.expense_tracker.model.Transaction::getAmount).reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+                model.addAttribute("familyTotal", famTotal);
+            }
         }
 
+        // ВОЗВРАЩАЕМ ПОТЕРЯННУЮ ЛОГИКУ ДЛЯ КНОПОК ПРИГЛАШЕНИЙ
         if (user.getRole() == Role.OWNER) {
             model.addAttribute("allClients", userService.findUsersWithoutFamily());
         }
-
         if (user.getRole() == Role.MANAGER) {
             model.addAttribute("allFamilies", familyService.findAllFamilies());
         }
-
         model.addAttribute("myInvitations", familyService.findPendingInvitations(user));
+
+        // ЗАКРЫВАЕМ МЕТОД И ВОЗВРАЩАЕМ ШАБЛОН
         return "family/index";
-    }
+    } // <-- ИМЕННО ЭТОЙ СКОБКИ НЕ ХВАТАЛО!
 
     @PostMapping("/create")
     public String createFamily(@AuthenticationPrincipal UserDetails userDetails, @RequestParam String name) {
@@ -48,10 +69,38 @@ public class FamilyController {
     }
 
     @PostMapping("/invite")
-    public String invite(@AuthenticationPrincipal UserDetails userDetails, @RequestParam Long clientId) {
+    public String invite(@AuthenticationPrincipal UserDetails userDetails,
+                         @RequestParam String username,
+                         RedirectAttributes redirectAttributes) {
         User owner = userService.findByUsername(userDetails.getUsername());
-        User client = userService.findById(clientId);
-        familyService.sendInvitation(owner, client);
+
+        try {
+            // Пытаемся найти пользователя по введенному логину
+            User client = userService.findByUsername(username);
+
+            // Серия проверок перед отправкой приглашения:
+            if (client.getRole() == Role.MANAGER) {
+                redirectAttributes.addFlashAttribute("inviteError", "Нельзя пригласить администратора системы.");
+                return "redirect:/family";
+            }
+            if (client.getFamily() != null) {
+                redirectAttributes.addFlashAttribute("inviteError", "Пользователь уже состоит в другой семье.");
+                return "redirect:/family";
+            }
+            if (client.getUsername().equals(owner.getUsername())) {
+                redirectAttributes.addFlashAttribute("inviteError", "Вы не можете пригласить самого себя.");
+                return "redirect:/family";
+            }
+
+            // Если все проверки пройдены — отправляем приглашение
+            familyService.sendInvitation(owner, client);
+            redirectAttributes.addFlashAttribute("inviteSuccess", "Приглашение успешно отправлено пользователю " + username);
+
+        } catch (RuntimeException e) {
+            // Если userService.findByUsername не найдет юзера, он выбросит ошибку, мы её ловим тут
+            redirectAttributes.addFlashAttribute("inviteError", "Пользователь с таким логином не найден.");
+        }
+
         return "redirect:/family";
     }
 

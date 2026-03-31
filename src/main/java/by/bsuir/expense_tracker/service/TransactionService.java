@@ -13,6 +13,7 @@ public interface TransactionService {
     Transaction findById(Long id);
     List<Transaction> findByUserAndPeriod(User user, LocalDateTime from, LocalDateTime to);
     List<Transaction> findVisibleTransactions(User user);
-
+    List<Transaction> findByUsers(List<User> users);
+    List<Transaction> findByUsersAndPeriod(List<User> users, java.time.LocalDateTime from, java.time.LocalDateTime to);
 
 }

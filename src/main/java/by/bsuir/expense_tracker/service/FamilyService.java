@@ -16,4 +16,5 @@ public interface FamilyService {
     List<Family> findAllFamilies();
     void deleteFamilyById(Long id);
     void removeMember(Long memberId, User owner);
+    void saveFamily(Family family);
 }

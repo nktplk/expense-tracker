@@ -16,7 +16,16 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<Category> findAvailableForUser(User user) {
-        return categoryRepository.findByOwnerIsNullOrOwner(user);
+        List<Category> categories = new java.util.ArrayList<>();
+        categories.addAll(categoryRepository.findByOwnerIsNull()); // Все видят системные
+
+        if (user.getFamily() != null) {
+            // Если в семье - видим личные категории создателя семьи (Овнера)
+            categories.addAll(categoryRepository.findByOwnerIn(List.of(user.getFamily().getOwner())));
+        } else {
+            categories.addAll(categoryRepository.findByOwnerIn(List.of(user)));
+        }
+        return categories;
     }
 
     @Override

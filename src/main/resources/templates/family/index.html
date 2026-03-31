@@ -42,6 +42,25 @@
         </div>
 
         <div class="col-md-8 mb-4" th:if="${family != null}">
+            <div class="card shadow-sm mb-4" th:if="${user.role.name() == 'OWNER'}">
+                <div class="card-header bg-success text-white">Траты семьи за месяц</div>
+                <div class="card-body">
+                    <h2 th:text="${familyTotal != null ? familyTotal : '0'} + ' BYN'"></h2>
+                    <table class="table table-sm mt-3">
+                        <thead>
+                        <tr><th>Дата</th><th>Кто потратил</th><th>Категория</th><th>Сумма</th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="t : ${familyTransactions}">
+                            <td th:text="${#temporals.format(t.createdAt, 'dd.MM HH:mm')}"></td>
+                            <td th:text="${t.user.username}" class="fw-bold text-primary"></td>
+                            <td th:text="${t.category.name}"></td>
+                            <td th:text="${t.amount} + ' BYN'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                     <span class="h5 mb-0" th:text="${family.name}">Название семьи</span>
@@ -66,18 +85,16 @@
 
                     <div th:if="${user.role.name() == 'OWNER'}" class="mt-4 border-top pt-3">
                         <h6>Пригласить нового участника:</h6>
+
+                        <div th:if="${inviteError}" class="alert alert-danger py-2 mt-2 mb-3" th:text="${inviteError}"></div>
+                        <div th:if="${inviteSuccess}" class="alert alert-success py-2 mt-2 mb-3" th:text="${inviteSuccess}"></div>
+
                         <form method="post" th:action="@{/family/invite}" class="d-flex">
-                            <select name="clientId" class="form-select me-2" required>
-                                <option value="" disabled selected>Выберите пользователя...</option>
-                                <option th:each="client : ${allClients}"
-                                        th:value="${client.id}"
-                                        th:text="${client.username} + ' (' + ${client.email} + ')'"></option>
-                            </select>
+                            <input type="text" name="username" class="form-control me-2"
+                                   placeholder="Введите логин пользователя..." required>
                             <button type="submit" class="btn btn-primary text-nowrap">Отправить приглашение</button>
                         </form>
-                        <small class="text-muted mt-1 d-block" th:if="${allClients != null and allClients.isEmpty()}">Нет доступных пользователей для приглашения.</small>
                     </div>
-
                     <div th:if="${user.role.name() == 'CLIENT'}" class="mt-4 border-top pt-3">
                         <form method="post" th:action="@{/family/leave}">
                             <button type="submit" class="btn btn-danger" onclick="return confirm('Вы уверены, что хотите покинуть семью? Вы потеряете доступ к общим расходам.')">Покинуть семью</button>
@@ -136,6 +153,16 @@
                                 <form method="post" th:action="@{/manager/family/{id}/delete(id=${f.id})}">
                                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить эту семью безвозвратно?')">Удалить</button>
                                 </form>
+                            </td>
+                            <td>
+                                <ul class="list-unstyled mb-0">
+                                    <li th:each="m : ${f.members}">
+                                        <span th:text="${m.username}"></span>
+                                        <form method="post" th:action="@{/family/remove/{id}(id=${m.id})}" class="d-inline" th:if="${m.id != f.owner.id}">
+                                            <button class="btn btn-link text-danger p-0 ms-2" style="font-size: 12px; text-decoration: none;" onclick="return confirm('Удалить участника из этой семьи?')">[X]</button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </td>
                         </tr>
                         <tr th:if="${allFamilies == null or allFamilies.isEmpty()}">

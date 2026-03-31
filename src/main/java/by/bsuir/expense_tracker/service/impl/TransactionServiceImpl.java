@@ -59,4 +59,13 @@ public class TransactionServiceImpl implements TransactionService {
         // Обычный Клиент (или оунер без семьи) видит только свои записи
         return transactionRepository.findByUserOrderByCreatedAtDesc(user);
     }
+    @Override
+    public List<Transaction> findByUsers(List<User> users) {
+        return transactionRepository.findByUserInOrderByCreatedAtDesc(users);
+    }
+
+    @Override
+    public List<Transaction> findByUsersAndPeriod(List<User> users, java.time.LocalDateTime from, java.time.LocalDateTime to) {
+        return transactionRepository.findByUserInAndCreatedAtBetween(users, from, to);
+    }
 }

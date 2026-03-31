@@ -3,6 +3,7 @@ package by.bsuir.expense_tracker.controller;
 import by.bsuir.expense_tracker.model.Category;
 import by.bsuir.expense_tracker.model.User;
 import by.bsuir.expense_tracker.service.CategoryService;
+import by.bsuir.expense_tracker.service.FamilyService;
 import by.bsuir.expense_tracker.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +19,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
     private final UserService userService;
+    private final FamilyService familyService;
 
     @GetMapping
     public String list(@AuthenticationPrincipal UserDetails userDetails, Model model) {
@@ -34,13 +36,14 @@ public class CategoryController {
     }
 
     @PostMapping("/save")
-    public String save(@AuthenticationPrincipal UserDetails userDetails,
-                       @ModelAttribute Category category,
-                       @RequestParam(defaultValue = "false") boolean isSystem) {
+    public String save(@AuthenticationPrincipal UserDetails userDetails, @ModelAttribute Category category) {
         User user = userService.findByUsername(userDetails.getUsername());
 
-        // Если галочка нажата, владелец = null (категория доступна всем). Иначе — текущий юзер.
-        category.setOwner(isSystem ? null : user);
+        if (user.getRole() == by.bsuir.expense_tracker.model.enums.Role.MANAGER) {
+            category.setOwner(null); // Менеджер создает только системные
+        } else {
+            category.setOwner(user); // Овнер создает личные для семьи
+        }
         categoryService.save(category);
         return "redirect:/categories";
     }
@@ -52,16 +55,24 @@ public class CategoryController {
     }
 
     @PostMapping("/edit/{id}")
-    public String update(@PathVariable Long id,
-                         @AuthenticationPrincipal UserDetails userDetails,
-                         @ModelAttribute Category category,
-                         @RequestParam(defaultValue = "false") boolean isSystem) {
+    public String update(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails, @ModelAttribute Category category) {
         User user = userService.findByUsername(userDetails.getUsername());
-        category.setId(id);
+        Category existing = categoryService.findById(id);
 
-        // Позволяем менять статус "системная/личная" при редактировании
-        category.setOwner(isSystem ? null : user);
-        categoryService.save(category);
+        if (existing.getOwner() == null && user.getRole() == by.bsuir.expense_tracker.model.enums.Role.OWNER) {
+            // ОВНЕР переопределяет лимит СИСТЕМНОЙ категории только для своей семьи
+            if (user.getFamily() != null) {
+                user.getFamily().getCustomLimits().put(existing, category.getMonthlyLimit());
+                // Сохраняем семью (так как словарь лимитов хранится в ней)
+                familyService.saveFamily(user.getFamily());
+                return "redirect:/categories";
+            }
+        }
+
+        // В остальных случаях (Менеджер редактирует системную или Овнер свою личную)
+        existing.setName(category.getName());
+        existing.setMonthlyLimit(category.getMonthlyLimit());
+        categoryService.save(existing);
         return "redirect:/categories";
     }
 

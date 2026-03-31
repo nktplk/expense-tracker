@@ -126,14 +126,18 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Override
     @Transactional
-    public void removeMember(Long memberId, User owner) {
-        User member = userRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
-
-        // Проверяем, что удаляет именно владелец этой семьи
-        if (member.getFamily() != null && member.getFamily().getOwner().getId().equals(owner.getId())) {
+    public void removeMember(Long memberId, User requester) {
+        User member = userRepository.findById(memberId).orElseThrow();
+        // Разрешаем удалять, если просит Менеджер ИЛИ это Овнер семьи
+        if (requester.getRole() == by.bsuir.expense_tracker.model.enums.Role.MANAGER ||
+                (member.getFamily() != null && member.getFamily().getOwner().getId().equals(requester.getId()))) {
             member.setFamily(null);
             userRepository.save(member);
         }
+    }
+
+    @Override
+    public void saveFamily(Family family) {
+        familyRepository.save(family);
     }
 }
