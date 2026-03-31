@@ -35,9 +35,12 @@ public class CategoryController {
 
     @PostMapping("/save")
     public String save(@AuthenticationPrincipal UserDetails userDetails,
-                       @ModelAttribute Category category) {
+                       @ModelAttribute Category category,
+                       @RequestParam(defaultValue = "false") boolean isSystem) {
         User user = userService.findByUsername(userDetails.getUsername());
-        category.setOwner(user);
+
+        // Если галочка нажата, владелец = null (категория доступна всем). Иначе — текущий юзер.
+        category.setOwner(isSystem ? null : user);
         categoryService.save(category);
         return "redirect:/categories";
     }
@@ -51,10 +54,13 @@ public class CategoryController {
     @PostMapping("/edit/{id}")
     public String update(@PathVariable Long id,
                          @AuthenticationPrincipal UserDetails userDetails,
-                         @ModelAttribute Category category) {
+                         @ModelAttribute Category category,
+                         @RequestParam(defaultValue = "false") boolean isSystem) {
         User user = userService.findByUsername(userDetails.getUsername());
         category.setId(id);
-        category.setOwner(user);
+
+        // Позволяем менять статус "системная/личная" при редактировании
+        category.setOwner(isSystem ? null : user);
         categoryService.save(category);
         return "redirect:/categories";
     }
