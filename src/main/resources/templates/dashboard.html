@@ -12,12 +12,20 @@
     <div class="container">
         <a class="navbar-brand" href="#">ExpenseTracker</a>
         <div class="ms-auto">
-            <span class="text-white me-3"
-                  th:text="${user.username}">Username</span>
-            <!-- Показывать только менеджеру -->
+            <span class="text-white me-3" th:text="${user.username}">Username</span>
+
+            <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')"
+               th:href="@{/categories}"
+               class="btn btn-outline-light btn-sm me-2">Категории</a>
+
+            <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')"
+               th:href="@{/profile}"
+               class="btn btn-outline-light btn-sm me-2">Профиль</a>
+
             <a sec:authorize="hasRole('MANAGER')"
                th:href="@{/manager/users}"
                class="btn btn-outline-light btn-sm me-2">Пользователи</a>
+
             <form method="post" th:action="@{/logout}" class="d-inline">
                 <button class="btn btn-outline-light btn-sm">Выйти</button>
             </form>
