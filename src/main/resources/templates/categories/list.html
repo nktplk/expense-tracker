@@ -10,28 +10,53 @@
     <h3>Категории</h3>
     <a th:href="@{/dashboard}" class="btn btn-secondary mb-2">← Назад</a>
     <a th:href="@{/categories/new}" class="btn btn-success mb-2">+ Новая категория</a>
-    <table class="table table-striped">
-        <thead>
-        <tr><th>Название</th><th>Лимит</th><th>Тип</th><th>Действия</th></tr>
+    <table class="table table-hover mt-4 bg-white shadow-sm rounded">
+        <thead class="table-dark">
+        <tr>
+            <th>Название</th>
+            <th>Тип</th>
+            <th>Лимит</th>
+            <th>Потрачено</th>
+            <th style="width: 25%;">Статус (за месяц)</th>
+            <th>Действия</th>
+        </tr>
         </thead>
         <tbody>
         <tr th:each="cat : ${categories}">
-            <td th:text="${cat.name}"></td>
-            <td th:text="${cat.owner == null and user.family != null and user.family.customLimits.containsKey(cat)}
-                         ? ${user.family.customLimits.get(cat)} + ' BYN (Лимит семьи)'
-                         : (${cat.monthlyLimit != null} ? ${cat.monthlyLimit} + ' BYN' : '—')"></td>
+            <td class="fw-bold" th:text="${cat.name}"></td>
+
             <td>
-                <span th:if="${cat.owner == null}" class="badge bg-secondary">Системная</span>
-                <span th:unless="${cat.owner == null}" class="badge bg-primary">Личная</span>
+                <span class="badge bg-secondary" th:if="${cat.owner == null}">Системная</span>
+                <span class="badge bg-primary" th:if="${cat.owner != null}">Личная</span>
             </td>
+
+            <td th:with="actualLimit=${cat.owner == null and user.family != null and user.family.customLimits.containsKey(cat) ? user.family.customLimits.get(cat) : cat.monthlyLimit}">
+                <span th:text="${actualLimit != null ? actualLimit + ' BYN' : 'Без лимита'}"></span>
+                <span th:if="${cat.owner == null and user.family != null and user.family.customLimits.containsKey(cat)}" class="badge bg-info text-dark ms-1">Семья</span>
+            </td>
+
+            <td th:text="${spentMap.getOrDefault(cat.id, 0)} + ' BYN'"></td>
+
+            <td th:with="actualLimit=${cat.owner == null and user.family != null and user.family.customLimits.containsKey(cat) ? user.family.customLimits.get(cat) : cat.monthlyLimit}, percent=${percentMap.get(cat.id)}">
+                <div th:if="${actualLimit != null}" class="progress mt-1" style="height: 20px;">
+                    <div class="progress-bar fw-bold"
+                         th:classappend="${percent >= 100} ? 'bg-danger' : (${percent >= 80} ? 'bg-warning text-dark' : 'bg-success')"
+                         role="progressbar"
+                         th:style="'width: ' + (${percent > 100} ? 100 : percent) + '%;'"
+                         th:text="${percent} + '%'">
+                    </div>
+                </div>
+                <span th:if="${actualLimit == null}" class="text-muted small">Нет лимита</span>
+            </td>
+
             <td>
-                <a th:if="${cat.owner != null}"
-                   th:href="@{/categories/edit/{id}(id=${cat.id})}"
-                   class="btn btn-sm btn-warning">Изменить</a>
-                <form th:if="${cat.owner != null}" method="post"
-                      th:action="@{/categories/delete/{id}(id=${cat.id})}" class="d-inline">
-                    <button class="btn btn-sm btn-danger">Удалить</button>
-                </form>
+                <div class="d-flex">
+                    <a th:href="@{/categories/edit/{id}(id=${cat.id})}" class="btn btn-warning btn-sm me-2">Изменить</a>
+                    <form method="post" th:action="@{/categories/delete/{id}(id=${cat.id})}"
+                          th:if="${cat.owner != null or user.role.name() == 'MANAGER'}">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Удалить категорию?')">Удалить</button>
+                    </form>
+                </div>
             </td>
         </tr>
         </tbody>

@@ -37,7 +37,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register", "/login", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/manager/**").hasRole("MANAGER")
-                        .requestMatchers("/profile/**", "/categories/**").hasAnyRole("OWNER", "MANAGER")
+                        .requestMatchers("/profile/**").hasAnyRole("OWNER", "MANAGER")
+                        .requestMatchers("/categories/**").authenticated() // Теперь Клиенты могут зайти
                         .requestMatchers("/family/**").authenticated()
                         .anyRequest().authenticated()
                 )

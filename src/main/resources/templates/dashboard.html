@@ -16,8 +16,7 @@
 
             <a th:href="@{/family}" class="btn btn-warning btn-sm me-2">Моя семья</a>
 
-            <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')"
-               th:href="@{/categories}"
+            <a th:href="@{/categories}"
                class="btn btn-outline-light btn-sm me-2">Категории</a>
 
             <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')"
