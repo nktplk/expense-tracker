@@ -85,3 +85,7 @@ You can find the live version of this project here: [https://extrack-ecz1.onrend
 
 4.  **Wait for Build:**
     Render will build the Docker image and start the Spring Boot application. Once the log shows `Started ExpenseTrackerApplication`, your app is live!
+5. **Standard users**
+   * login - `admin`, pass - `admin123`
+   * login - `owner`, pass - `owner123`
+   * login - `user`, pass - `user123`
