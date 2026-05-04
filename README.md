@@ -63,7 +63,7 @@ docker run -p 8080:8080 -e DB_URL=jdbc:postgresql://host:port/db -e DB_USER=user
 
 ## 🌍 Live Demo & Deployment (Example: Render.com)
 
-You can find the live version of this project here: [https://extrack-ecz1.onrender.com](https://extrack-ecz1.onrender.com) (Until May 31 '26)
+You can find the live version of this project here: [https://extrack-ecz1.onrender.com/login](https://extrack-ecz1.onrender.com/login) (Until May 31 '26)
 
 ### How to deploy to Render:
 
