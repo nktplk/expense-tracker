@@ -2,34 +2,354 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Профиль</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройки профиля - ExTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --brand-color: #5850EC;
+            --brand-hover: #463bce;
+            --bg-light: #F4F6F9;
+            --text-main: #2B2D42;
+            --text-muted: #8D99AE;
+            --card-radius: 20px;
+            --input-radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Десктопный сайдбар */
+        .sidebar {
+            background-color: var(--brand-color);
+            color: white;
+            min-height: 100vh;
+            width: 260px;
+            border-top-right-radius: 24px;
+            border-bottom-right-radius: 24px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-link-custom {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link-custom:hover, .nav-link-custom.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-link-custom i {
+            font-size: 1.2rem;
+        }
+
+        /* Основной контент */
+        .main-wrapper {
+            margin-left: 260px; /* Отступ под сайдбар */
+            padding: 2.5rem 3rem;
+        }
+
+        /* Карточки и элементы форм */
+        .ui-card {
+            background: white;
+            border-radius: var(--card-radius);
+            border: none;
+            box-shadow: 0px 8px 24px rgba(149, 157, 165, 0.08);
+            padding: 2.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border-radius: var(--input-radius);
+            padding: 0.8rem 1.2rem;
+            border: 1px solid #E2E8F0;
+            background-color: #F8FAFC;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .form-control:focus {
+            background-color: white;
+            border-color: var(--brand-color);
+            box-shadow: 0 0 0 4px rgba(88, 80, 236, 0.1);
+        }
+
+        .form-control:disabled {
+            background-color: #F1F5F9;
+            color: var(--text-muted);
+        }
+
+        .btn-brand {
+            background-color: var(--brand-color);
+            color: white;
+            border-radius: var(--input-radius);
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-brand:hover {
+            background-color: var(--brand-hover);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-light-custom {
+            background-color: white;
+            color: var(--text-main);
+            border: 1px solid #E2E8F0;
+            border-radius: var(--input-radius);
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-light-custom:hover {
+            background-color: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        /* Аватарка в настройках */
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background-color: #FFA6A6; /* Цвет из дизайна (кружок David Smith) */
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            box-shadow: 0px 4px 12px rgba(255, 166, 166, 0.4);
+        }
+
+        /* Мобильное нижнее меню */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0px -4px 24px rgba(0,0,0,0.06);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            padding: 0.5rem 1.5rem;
+            padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+            z-index: 1000;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-nav-item {
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            text-decoration: none;
+            padding: 10px;
+            transition: color 0.2s;
+        }
+
+        .mobile-nav-item.active {
+            color: var(--brand-color);
+        }
+
+        .fab-button {
+            width: 56px;
+            height: 56px;
+            background-color: var(--brand-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0px 8px 20px rgba(88, 80, 236, 0.3);
+            transform: translateY(-20px);
+            text-decoration: none;
+        }
+
+        .fab-button:hover {
+            color: white;
+            background-color: var(--brand-hover);
+        }
+
+        /* Адаптив */
+        @media (max-width: 991px) {
+            .sidebar {
+                display: none;
+            }
+            .main-wrapper {
+                margin-left: 0;
+                padding: 1.5rem 1rem;
+                padding-bottom: 100px; /* Место под mobile nav */
+            }
+            .mobile-nav {
+                display: flex;
+            }
+        }
+    </style>
 </head>
-<body class="bg-light">
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <h3>Мой профиль</h3>
-            <div th:if="${param.saved}" class="alert alert-success">Сохранено!</div>
-            <form method="post" th:action="@{/profile}">
-                <div class="mb-3">
-                    <label class="form-label">Логин</label>
-                    <input type="text" class="form-control" th:value="${user.username}" disabled>
+<body>
+
+<aside class="sidebar">
+    <div class="brand-logo">
+        <i class="bi bi-wallet2"></i> ExTrack
+    </div>
+    <nav class="d-flex flex-column flex-grow-1">
+        <a th:href="@{/dashboard}" class="nav-link-custom">
+            <i class="bi bi-grid-fill"></i> Dashboard
+        </a>
+        <a href="#" class="nav-link-custom">
+            <i class="bi bi-arrow-left-right"></i> Транзакции
+        </a>
+        <a href="#" class="nav-link-custom">
+            <i class="bi bi-credit-card-fill"></i> Счета и Карты
+        </a>
+        <a href="#" class="nav-link-custom">
+            <i class="bi bi-people-fill"></i> Моя семья
+        </a>
+
+        <div class="mt-auto">
+            <a th:href="@{/profile}" class="nav-link-custom active">
+                <i class="bi bi-gear-fill"></i> Настройки
+            </a>
+        </div>
+    </nav>
+</aside>
+
+<main class="main-wrapper">
+
+    <header class="d-flex justify-content-between align-items-center mb-5">
+        <h2 class="fw-bold m-0" style="color: #11142D;">Мой профиль</h2>
+        <div class="d-none d-md-flex align-items-center gap-3">
+            <span class="fw-semibold text-dark" th:text="${user.username}">Имя Пользователя</span>
+            <div class="profile-avatar" style="width: 44px; height: 44px; font-size: 1.2rem; margin: 0;">
+                <i class="bi bi-person"></i>
+            </div>
+        </div>
+    </header>
+
+    <div class="row">
+        <div class="col-xl-6 col-lg-8 col-md-10">
+            <div class="ui-card">
+
+                <div th:if="${param.saved}" class="alert alert-success d-flex align-items-center mb-4" style="border-radius: 12px; border: none; background-color: #ECFDF5; color: #15803D;">
+                    <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                    <div>Ваши настройки успешно сохранены!</div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" th:value="${user.email}"
-                           class="form-control" required>
+
+                <div class="d-flex align-items-center gap-4 mb-4">
+                    <div class="profile-avatar">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-1" th:text="${user.username}">Имя Пользователя</h4>
+                        <p class="text-muted mb-0">Управление личными данными</p>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Новый пароль (оставьте пустым если не меняете)</label>
-                    <input type="password" name="password" class="form-control">
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Сохранить</button>
-                <a th:href="@{/dashboard}" class="btn btn-secondary w-100 mt-2">Назад</a>
-            </form>
+
+                <form method="post" th:action="@{/profile}">
+
+                    <div class="mb-4">
+                        <label class="form-label">Логин (Имя пользователя)</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0" style="background: #F1F5F9; border-top-left-radius: var(--input-radius); border-bottom-left-radius: var(--input-radius);"><i class="bi bi-person-fill text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0" th:value="${user.username}" disabled style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                        </div>
+                        <div class="form-text mt-2"><i class="bi bi-info-circle"></i> Логин используется для входа и не может быть изменен.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Адрес электронной почты</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--input-radius); border-bottom-left-radius: var(--input-radius);"><i class="bi bi-envelope text-muted"></i></span>
+                            <input type="email" name="email" th:value="${user.email}" class="form-control border-start-0" required placeholder="Введите ваш email" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="form-label">Новый пароль</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--input-radius); border-bottom-left-radius: var(--input-radius);"><i class="bi bi-lock text-muted"></i></span>
+                            <input type="password" name="password" class="form-control border-start-0" placeholder="Оставьте пустым, если не хотите менять" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column flex-sm-row gap-3">
+                        <button type="submit" class="btn btn-brand flex-grow-1">
+                            <i class="bi bi-check2-circle me-1"></i> Сохранить изменения
+                        </button>
+                        <a th:href="@{/dashboard}" class="btn btn-light-custom flex-grow-1 text-center text-decoration-none">
+                            Отмена
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+</main>
+
+<nav class="mobile-nav d-lg-none">
+    <a th:href="@{/dashboard}" class="mobile-nav-item">
+        <i class="bi bi-house-door-fill"></i>
+    </a>
+    <a href="#" class="mobile-nav-item">
+        <i class="bi bi-bar-chart-fill"></i>
+    </a>
+    <a href="#" class="fab-button">
+        <i class="bi bi-plus"></i>
+    </a>
+    <a href="#" class="mobile-nav-item">
+        <i class="bi bi-credit-card-fill"></i>
+    </a>
+    <a th:href="@{/profile}" class="mobile-nav-item active">
+        <i class="bi bi-person-fill"></i>
+    </a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

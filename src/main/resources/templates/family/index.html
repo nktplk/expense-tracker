@@ -3,174 +3,483 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Семья</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление семьей - ExTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="bg-light">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="#">ExpenseTracker</a>
-        <div class="ms-auto">
-            <span class="text-white me-3" th:text="${user.username}">Username</span>
-            <a th:href="@{/dashboard}" class="btn btn-outline-light btn-sm me-2">На главную</a>
-            <a th:href="@{/accounts}" class="btn btn-success btn-sm me-2">Счета и Переводы</a>
-            <form method="post" th:action="@{/logout}" class="d-inline">
-                <button class="btn btn-outline-light btn-sm">Выйти</button>
+    <style>
+        :root {
+            --brand-color: #5850EC;
+            --brand-hover: #463bce;
+            --bg-light: #F4F6F9;
+            --text-main: #2B2D42;
+            --text-muted: #8D99AE;
+            --card-radius: 20px;
+            --input-radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Десктопный сайдбар */
+        .sidebar {
+            background-color: var(--brand-color);
+            color: white;
+            min-height: 100vh;
+            width: 260px;
+            border-top-right-radius: 24px;
+            border-bottom-right-radius: 24px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-link-custom {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link-custom:hover, .nav-link-custom.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-link-custom i {
+            font-size: 1.2rem;
+        }
+
+        /* Основной контент */
+        .main-wrapper {
+            margin-left: 260px;
+            padding: 2.5rem 3rem;
+        }
+
+        /* Элементы UI */
+        .ui-card {
+            background: white;
+            border-radius: var(--card-radius);
+            border: none;
+            box-shadow: 0px 8px 24px rgba(149, 157, 165, 0.08);
+            padding: 1.5rem;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid #E2E8F0;
+            height: 100%;
+        }
+
+        .form-control, .form-select {
+            border-radius: var(--input-radius);
+            padding: 0.8rem 1.2rem;
+            border: 1px solid #E2E8F0;
+            background-color: #F8FAFC;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            background-color: white;
+            border-color: var(--brand-color);
+            box-shadow: 0 0 0 4px rgba(88, 80, 236, 0.1);
+        }
+
+        .btn-brand {
+            background-color: var(--brand-color);
+            color: white;
+            border-radius: var(--input-radius);
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-brand:hover {
+            background-color: var(--brand-hover);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* Аватарка в шапке */
+        .profile-avatar {
+            width: 44px;
+            height: 44px;
+            background-color: #FFA6A6;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* Список участников */
+        .member-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .member-item:last-child {
+            border-bottom: none;
+        }
+
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #E0E7FF;
+            color: var(--brand-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .role-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        /* Таблица транзакций и менеджера */
+        .table-custom th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #F1F5F9;
+            padding-bottom: 1rem;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            border-bottom: 1px solid #F8FAFC;
+            padding: 1rem 0.5rem;
+        }
+
+        /* Мобильное нижнее меню */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0px -4px 24px rgba(0,0,0,0.06);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            padding: 0.5rem 1.5rem;
+            padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+            z-index: 1000;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-nav-item {
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            text-decoration: none;
+            padding: 10px;
+        }
+
+        .mobile-nav-item.active {
+            color: var(--brand-color);
+        }
+
+        .fab-button {
+            width: 56px;
+            height: 56px;
+            background-color: var(--brand-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0px 8px 20px rgba(88, 80, 236, 0.3);
+            transform: translateY(-20px);
+            text-decoration: none;
+        }
+
+        @media (max-width: 991px) {
+            .sidebar { display: none; }
+            .main-wrapper {
+                margin-left: 0;
+                padding: 1.5rem 1rem;
+                padding-bottom: 100px;
+            }
+            .mobile-nav { display: flex; }
+        }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <a href="#" class="brand-logo">
+        <i class="bi bi-wallet2"></i> ExTrack
+    </a>
+    <nav class="d-flex flex-column flex-grow-1">
+        <a th:href="@{/dashboard}" class="nav-link-custom">
+            <i class="bi bi-grid-fill"></i> Главная
+        </a>
+        <a th:href="@{/accounts}" class="nav-link-custom">
+            <i class="bi bi-credit-card-fill"></i> Счета и Карты
+        </a>
+        <a th:href="@{/family}" class="nav-link-custom active">
+            <i class="bi bi-people-fill"></i> Моя семья
+        </a>
+        <a th:href="@{/categories}" class="nav-link-custom">
+            <i class="bi bi-tags-fill"></i> Категории
+        </a>
+
+        <div class="mt-auto">
+            <a sec:authorize="hasRole('MANAGER')" th:href="@{/manager/users}" class="nav-link-custom mb-2">
+                <i class="bi bi-shield-lock-fill"></i> Пользователи
+            </a>
+            <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')" th:href="@{/profile}" class="nav-link-custom">
+                <i class="bi bi-gear-fill"></i> Настройки
+            </a>
+            <form method="post" th:action="@{/logout}" class="mt-2">
+                <button type="submit" class="nav-link-custom w-100 border-0 text-start" style="background: transparent;">
+                    <i class="bi bi-box-arrow-right"></i> Выйти
+                </button>
             </form>
         </div>
+    </nav>
+</aside>
+
+<main class="main-wrapper">
+
+    <header class="d-flex justify-content-between align-items-center mb-4 mb-lg-5">
+        <div class="d-flex align-items-center gap-3">
+            <a th:href="@{/dashboard}" class="btn btn-light rounded-circle d-flex align-items-center justify-content-center border-0 shadow-sm d-lg-none" style="width: 40px; height: 40px;">
+                <i class="bi bi-arrow-left fs-5"></i>
+            </a>
+            <div>
+                <h2 class="fw-bold m-0" style="color: #11142D;">Управление семьей</h2>
+                <span class="text-muted d-none d-sm-block" style="font-size: 0.9rem;">Совместный учет финансов</span>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div class="d-none d-sm-block text-end">
+                <div class="fw-semibold text-dark lh-1" th:text="${user.username}">Username</div>
+            </div>
+            <div class="profile-avatar">
+                <i class="bi bi-person"></i>
+            </div>
+        </div>
+    </header>
+
+    <div th:if="${inviteError}" class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-4" style="border-radius: 16px; background-color: #FEF2F2; color: #DC2626;">
+        <i class="bi bi-exclamation-triangle-fill fs-5 me-3"></i> <span th:text="${inviteError}"></span>
     </div>
-</nav>
+    <div th:if="${inviteSuccess}" class="alert alert-success border-0 shadow-sm d-flex align-items-center mb-4" style="border-radius: 16px; background-color: #ECFDF5; color: #10B981;">
+        <i class="bi bi-check-circle-fill fs-5 me-3"></i> <span th:text="${inviteSuccess}"></span>
+    </div>
 
-<div class="container">
-    <h2 class="mb-4">Управление семьей</h2>
+    <div class="mb-4" th:if="${myInvitations != null and !myInvitations.isEmpty()}">
+        <h5 class="fw-bold mb-3"><i class="bi bi-envelope-paper-heart text-warning me-2"></i>Новые приглашения</h5>
+        <div class="row g-3">
+            <div class="col-md-6 col-lg-4" th:each="inv : ${myInvitations}">
+                <div class="ui-card d-flex flex-column h-100" style="background: linear-gradient(145deg, #FFFBEB 0%, #FFFFFF 100%); border: 1px solid #FEF3C7;">
+                    <p class="mb-3 text-dark">
+                        Пользователь <strong th:text="${inv.sender.username}">Sender</strong> приглашает вас присоединиться к семье <strong class="text-primary" th:text="${inv.family.name}">Family</strong>.
+                    </p>
+                    <div class="d-flex gap-2 mt-auto">
+                        <form method="post" th:action="@{/family/invitation/{id}/accept(id=${inv.id})}" class="flex-grow-1 m-0">
+                            <button type="submit" class="btn btn-success w-100 rounded-3 py-2 fw-semibold"><i class="bi bi-check-lg me-1"></i>Принять</button>
+                        </form>
+                        <form method="post" th:action="@{/family/invitation/{id}/reject(id=${inv.id})}" class="flex-grow-1 m-0">
+                            <button type="submit" class="btn btn-outline-danger w-100 rounded-3 py-2 fw-semibold">Отклонить</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <div class="row">
-        <div class="col-md-6 mb-4" th:if="${user.role.name() == 'OWNER' and family == null}">
-            <div class="card shadow-sm border-primary">
-                <div class="card-header bg-primary text-white">Создать новую семью</div>
-                <div class="card-body">
-                    <p class="text-muted">Создайте семью, чтобы приглашать участников и вести совместный учет.</p>
-                    <form method="post" th:action="@{/family/create}">
-                        <div class="mb-3">
-                            <label class="form-label">Название семьи</label>
-                            <input type="text" name="name" class="form-control" required placeholder="Например: Семья Ивановых">
+    <div class="row justify-content-center" th:if="${user.role.name() == 'OWNER' and family == null}">
+        <div class="col-md-8 col-lg-6">
+            <div class="ui-card text-center py-5">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-4" style="width: 80px; height: 80px; background-color: rgba(88, 80, 236, 0.1); color: var(--brand-color);">
+                    <i class="bi bi-house-add-fill" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="fw-bold mb-3">Создать новую семью</h3>
+                <p class="text-muted mb-4 px-3">Создайте семью, чтобы приглашать других участников (например, супруга или детей) и вести совместный учет доходов и расходов.</p>
+
+                <form method="post" th:action="@{/family/create}" class="px-md-4">
+                    <div class="mb-4 text-start">
+                        <label class="form-label">Название семьи</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-end-0 bg-transparent"><i class="bi bi-people text-muted"></i></span>
+                            <input type="text" name="name" class="form-control border-start-0" required placeholder="Например: Семья Ивановых">
                         </div>
-                        <button type="submit" class="btn btn-success w-100">Создать</button>
-                    </form>
+                    </div>
+                    <button type="submit" class="btn btn-brand w-100 py-3 fs-6"><i class="bi bi-plus-lg me-2"></i>Создать семью</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4" th:if="${family != null}">
+
+        <div class="col-xl-8 col-lg-7" th:if="${user.role.name() == 'OWNER'}">
+
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6">
+                    <div class="summary-card">
+                        <div class="text-muted fw-medium mb-1"><i class="bi bi-arrow-up-circle-fill text-success me-2"></i>Доходы семьи за месяц</div>
+                        <h3 class="fw-bold text-dark m-0" th:text="'+ ' + ${familyIncomeTotal != null ? familyIncomeTotal : '0.00'} + ' BYN'">+ 0.00 BYN</h3>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="summary-card">
+                        <div class="text-muted fw-medium mb-1"><i class="bi bi-arrow-down-circle-fill text-danger me-2"></i>Расходы семьи за месяц</div>
+                        <h3 class="fw-bold text-dark m-0" th:text="'- ' + ${familyExpenseTotal != null ? familyExpenseTotal : '0.00'} + ' BYN'">- 0.00 BYN</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ui-card">
+                <h5 class="fw-bold mb-4">История операций семьи</h5>
+                <div class="table-responsive">
+                    <table class="table table-custom table-hover m-0">
+                        <thead>
+                        <tr>
+                            <th scope="col">Дата</th>
+                            <th scope="col">Кто</th>
+                            <th scope="col">Категория</th>
+                            <th scope="col">Описание</th>
+                            <th scope="col" class="text-end">Сумма</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="t : ${transactions}">
+                            <td class="text-muted" th:text="${#temporals.format(t.createdAt, 'dd.MM')}">Дата</td>
+                            <td>
+                                <span class="badge bg-light text-dark border fw-semibold" th:text="${t.user.username}">Кто</span>
+                            </td>
+                            <td th:text="${t.category != null ? t.category.name : (t.type.name() == 'INCOME' ? 'Пополнение' : 'Перевод')}">Категория</td>
+                            <td th:text="${t.description}">Описание</td>
+                            <td class="text-end fw-bold"
+                                th:classappend="${t.type.name() == 'INCOME'} ? 'text-success' : 'text-danger'"
+                                th:text="${t.type.name() == 'INCOME' ? '+' : '-'} + ${t.amount} + ' BYN'">
+                            </td>
+                        </tr>
+                        <tr th:if="${transactions == null or transactions.isEmpty()}">
+                            <td colspan="5" class="text-center text-muted py-5">
+                                <i class="bi bi-receipt fs-2 d-block mb-2"></i>
+                                В этом месяце операций не было.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-8 mb-4" th:if="${family != null}">
+        <div th:class="${user.role.name() == 'OWNER'} ? 'col-xl-4 col-lg-5' : 'col-lg-6 col-md-8 mx-auto'">
+            <div class="ui-card p-0 overflow-hidden">
 
-            <div class="mb-4" th:if="${user.role.name() == 'OWNER'}">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="card border-success shadow-sm h-100">
-                            <div class="card-header bg-success text-white">Доходы семьи за месяц</div>
-                            <div class="card-body">
-                                <h2 class="text-success mb-0" th:text="'+ ' + ${familyIncomeTotal != null ? familyIncomeTotal : '0.00'} + ' BYN'"></h2>
+                <div class="bg-primary text-white p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h5 class="fw-bold m-0" th:text="${family.name}">Название семьи</h5>
+                        <span class="badge bg-white text-primary rounded-pill px-2 py-1">
+                                <i class="bi bi-people-fill me-1"></i> <span th:text="${family.members.size()}"></span>
+                            </span>
+                    </div>
+                    <span style="font-size: 0.85rem; opacity: 0.8;">Состав семьи</span>
+                </div>
+
+                <div class="p-3 p-md-4">
+                    <div class="member-item" th:each="member : ${family.members}">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="member-avatar">
+                                <span th:text="${#strings.substring(member.username, 0, 1).toUpperCase()}">U</span>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card border-danger shadow-sm h-100">
-                            <div class="card-header bg-danger text-white">Расходы семьи за месяц</div>
-                            <div class="card-body">
-                                <h2 class="text-danger mb-0" th:text="'- ' + ${familyExpenseTotal != null ? familyExpenseTotal : '0.00'} + ' BYN'"></h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-dark text-white">История операций семьи</div>
-                    <div class="card-body p-0">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                            <tr>
-                                <th>Дата</th>
-                                <th>Кто</th>
-                                <th>Категория</th>
-                                <th>Описание</th>
-                                <th>Сумма</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="t : ${transactions}">
-                                <td th:text="${#temporals.format(t.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</td>
-                                <td class="fw-bold text-muted" th:text="${t.user.username}">Кто</td>
-
-                                <td th:text="${t.category != null ? t.category.name : (t.type.name() == 'INCOME' ? 'Доход (Пополнение)' : 'Перевод')}">Категория</td>
-
-                                <td th:text="${t.description}">Описание</td>
-
-                                <td th:classappend="${t.type.name() == 'INCOME'} ? 'text-success fw-bold' : 'text-danger'"
-                                    th:text="${t.type.name() == 'INCOME' ? '+' : '-'} + ${t.amount} + ' BYN'">Сумма
-                                </td>
-                            </tr>
-                            <tr th:if="${transactions == null or transactions.isEmpty()}">
-                                <td colspan="5" class="text-center text-muted py-3">В этом месяце операций не было.</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card shadow-sm">
-                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                    <span class="h5 mb-0" th:text="${family.name}">Название семьи</span>
-                    <span class="badge bg-light text-dark" th:text="'Участников: ' + ${family.members.size()}"></span>
-                </div>
-                <div class="card-body">
-                    <h5>Состав семьи:</h5>
-                    <ul class="list-group mb-4">
-                        <li class="list-group-item d-flex justify-content-between align-items-center" th:each="member : ${family.members}">
                             <div>
-                                <span th:text="${member.username}" class="fw-bold">Имя</span>
-                                <span class="badge bg-primary ms-2" th:if="${member.id == family.owner.id}">Создатель</span>
-                                <span class="badge bg-info text-dark ms-2" th:if="${member.id != family.owner.id and member.role.name() == 'OWNER'}">Совладелец</span>
-                                <span class="badge bg-secondary ms-2" th:if="${member.role.name() == 'CLIENT'}">Участник</span>
+                                <div class="fw-bold text-dark" style="font-size: 0.95rem;" th:text="${member.username}">Имя</div>
+
+                                <span class="role-badge bg-primary bg-opacity-10 text-primary mt-1" th:if="${member.id == family.owner.id}">Создатель</span>
+                                <span class="role-badge bg-info bg-opacity-10 text-info mt-1" th:if="${member.id != family.owner.id and member.role.name() == 'OWNER'}">Совладелец</span>
+                                <span class="role-badge bg-secondary bg-opacity-10 text-secondary mt-1" th:if="${member.role.name() == 'CLIENT'}">Участник</span>
                             </div>
+                        </div>
 
-                            <div class="d-flex gap-2">
-                                <th:block th:if="${user.id == family.owner.id and member.id != family.owner.id}">
-                                    <form th:if="${member.role.name() == 'CLIENT'}" method="post" th:action="@{/family/promote/{id}(id=${member.id})}">
-                                        <button class="btn btn-sm btn-outline-success">Сделать совладельцем</button>
-                                    </form>
-                                    <form th:if="${member.role.name() == 'OWNER'}" method="post" th:action="@{/family/demote/{id}(id=${member.id})}">
-                                        <button class="btn btn-sm btn-outline-warning text-dark">Разжаловать</button>
-                                    </form>
-                                </th:block>
-
-                                <form method="post" th:action="@{/family/remove/{id}(id=${member.id})}"
-                                      th:if="${member.id != family.owner.id and (user.id == family.owner.id or (user.role.name() == 'OWNER' and member.role.name() == 'CLIENT') or user.role.name() == 'MANAGER')}">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Исключить пользователя из семьи?')">Исключить</button>
+                        <div class="d-flex gap-2">
+                            <th:block th:if="${user.id == family.owner.id and member.id != family.owner.id}">
+                                <form th:if="${member.role.name() == 'CLIENT'}" method="post" th:action="@{/family/promote/{id}(id=${member.id})}" class="m-0">
+                                    <button class="btn btn-sm btn-light text-success rounded-circle" title="Сделать совладельцем" style="width: 32px; height: 32px; padding: 0;"><i class="bi bi-arrow-up-circle-fill"></i></button>
                                 </form>
+                                <form th:if="${member.role.name() == 'OWNER'}" method="post" th:action="@{/family/demote/{id}(id=${member.id})}" class="m-0">
+                                    <button class="btn btn-sm btn-light text-warning rounded-circle" title="Разжаловать" style="width: 32px; height: 32px; padding: 0;"><i class="bi bi-arrow-down-circle-fill"></i></button>
+                                </form>
+                            </th:block>
+
+                            <form method="post" th:action="@{/family/remove/{id}(id=${member.id})}" class="m-0"
+                                  th:if="${member.id != family.owner.id and (user.id == family.owner.id or (user.role.name() == 'OWNER' and member.role.name() == 'CLIENT') or user.role.name() == 'MANAGER')}">
+                                <button type="submit" class="btn btn-sm btn-light text-danger rounded-circle" title="Исключить" onclick="return confirm('Исключить пользователя из семьи?')" style="width: 32px; height: 32px; padding: 0;"><i class="bi bi-person-x-fill"></i></button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div th:if="${user.role.name() == 'OWNER'}" class="mt-4 pt-4 border-top">
+                        <h6 class="fw-bold mb-3" style="font-size: 0.9rem;">Пригласить участника</h6>
+                        <form method="post" th:action="@{/family/invite}">
+                            <div class="input-group">
+                                <span class="input-group-text border-end-0 bg-light"><i class="bi bi-person-plus text-muted"></i></span>
+                                <input type="text" name="username" class="form-control border-start-0 bg-light" placeholder="Логин пользователя" required>
+                                <button type="submit" class="btn btn-brand border-start-0" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">Отправить</button>
                             </div>
-                        </li>
-                    </ul>
-
-                    <div th:if="${user.role.name() == 'OWNER'}" class="mt-4 border-top pt-3">
-                        <h6>Пригласить нового участника:</h6>
-                        <div th:if="${inviteError}" class="alert alert-danger py-2 mt-2 mb-3" th:text="${inviteError}"></div>
-                        <div th:if="${inviteSuccess}" class="alert alert-success py-2 mt-2 mb-3" th:text="${inviteSuccess}"></div>
-
-                        <form method="post" th:action="@{/family/invite}" class="d-flex">
-                            <input type="text" name="username" class="form-control me-2" placeholder="Введите логин пользователя..." required>
-                            <button type="submit" class="btn btn-primary text-nowrap">Отправить приглашение</button>
                         </form>
                     </div>
 
-                    <div th:if="${user.role.name() == 'CLIENT'}" class="mt-4 border-top pt-3">
-                        <form method="post" th:action="@{/family/leave}">
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('Вы уверены, что хотите покинуть семью? Вы потеряете доступ к общим расходам.')">Покинуть семью</button>
+                    <div th:if="${user.role.name() == 'CLIENT'}" class="mt-4 pt-4 border-top">
+                        <form method="post" th:action="@{/family/leave}" class="m-0">
+                            <button type="submit" class="btn btn-outline-danger w-100 fw-semibold" onclick="return confirm('Вы уверены, что хотите покинуть семью? Вы потеряете доступ к общим расходам.')">
+                                <i class="bi bi-box-arrow-left me-2"></i> Покинуть семью
+                            </button>
                         </form>
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-md-4 mb-4" th:if="${myInvitations != null and !myInvitations.isEmpty()}">
-            <div class="card shadow-sm border-warning">
-                <div class="card-header bg-warning text-dark">Входящие приглашения</div>
-                <div class="card-body">
-                    <div class="alert alert-info" th:each="inv : ${myInvitations}">
-                        <div class="mb-2">
-                            Вам пришло приглашение в семью <strong th:text="${inv.family.name}">Семья</strong>
-                            от <strong th:text="${inv.sender.username}">Пользователь</strong>.
-                        </div>
-                        <div class="d-flex">
-                            <form method="post" th:action="@{/family/invitation/{id}/accept(id=${inv.id})}" class="me-2 w-50">
-                                <button type="submit" class="btn btn-success btn-sm w-100">Принять</button>
-                            </form>
-                            <form method="post" th:action="@{/family/invitation/{id}/reject(id=${inv.id})}" class="w-50">
-                                <button type="submit" class="btn btn-outline-danger btn-sm w-100">Отклонить</button>
-                            </form>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -178,33 +487,42 @@
 
     <div class="row mt-5" sec:authorize="hasRole('MANAGER')">
         <div class="col-12">
-            <div class="card shadow-sm border-dark">
-                <div class="card-header bg-dark text-white">Администрирование: Все семьи системы</div>
-                <div class="card-body">
-                    <table class="table table-striped">
+            <div class="ui-card shadow-sm border-0 border-top border-4 border-dark">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold m-0"><i class="bi bi-buildings-fill text-dark me-2"></i>Администрирование: Все семьи</h4>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-custom table-hover">
                         <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Название семьи</th>
-                            <th>Владелец (Owner)</th>
-                            <th>Кол-во участников</th>
-                            <th>Действия</th>
+                            <th scope="col" style="width: 60px;">ID</th>
+                            <th scope="col">Название семьи</th>
+                            <th scope="col">Владелец</th>
+                            <th scope="col" class="text-center">Участников</th>
+                            <th scope="col" class="text-end">Действия</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:each="f : ${allFamilies}">
-                            <td th:text="${f.id}"></td>
-                            <td th:text="${f.name}"></td>
-                            <td th:text="${f.owner.username}"></td>
-                            <td th:text="${f.members.size()}"></td>
+                            <td class="text-muted fw-medium" th:text="${'#' + f.id}"></td>
+                            <td class="fw-bold text-dark" th:text="${f.name}"></td>
                             <td>
-                                <form method="post" th:action="@{/manager/family/{id}/delete(id=${f.id})}">
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить эту семью безвозвратно?')">Удалить</button>
+                                <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3 rounded-pill" th:text="${f.owner.username}"></span>
+                            </td>
+                            <td class="text-center fw-medium" th:text="${f.members.size()}"></td>
+                            <td class="text-end">
+                                <form method="post" th:action="@{/manager/family/{id}/delete(id=${f.id})}" class="m-0">
+                                    <button type="submit" class="btn btn-sm btn-light text-danger rounded-3 fw-semibold px-3" onclick="return confirm('Удалить эту семью безвозвратно? Все связи будут разорваны.')">
+                                        <i class="bi bi-trash-fill me-1"></i> Удалить
+                                    </button>
                                 </form>
                             </td>
                         </tr>
                         <tr th:if="${allFamilies == null or allFamilies.isEmpty()}">
-                            <td colspan="5" class="text-center text-muted">В системе пока нет созданных семей.</td>
+                            <td colspan="5" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                В системе пока нет созданных семей.
+                            </td>
                         </tr>
                         </tbody>
                     </table>
@@ -213,6 +531,28 @@
         </div>
     </div>
 
-</div>
+</main>
+
+<nav class="mobile-nav d-lg-none">
+    <a th:href="@{/dashboard}" class="mobile-nav-item">
+        <i class="bi bi-house-door-fill"></i>
+    </a>
+    <a th:href="@{/accounts}" class="mobile-nav-item">
+        <i class="bi bi-credit-card-fill"></i>
+    </a>
+
+    <a th:href="@{/transactions/new}" class="fab-button">
+        <i class="bi bi-plus"></i>
+    </a>
+
+    <a th:href="@{/family}" class="mobile-nav-item active">
+        <i class="bi bi-people-fill"></i>
+    </a>
+    <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')" th:href="@{/profile}" class="mobile-nav-item">
+        <i class="bi bi-person-fill"></i>
+    </a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

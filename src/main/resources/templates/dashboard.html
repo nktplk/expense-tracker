@@ -3,124 +3,427 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Главная</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная - ExTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --brand-color: #5850EC;
+            --brand-hover: #463bce;
+            --bg-light: #F4F6F9;
+            --text-main: #2B2D42;
+            --text-muted: #8D99AE;
+            --card-radius: 20px;
+            --success-color: #10B981;
+            --danger-color: #EF4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Десктопный сайдбар */
+        .sidebar {
+            background-color: var(--brand-color);
+            color: white;
+            min-height: 100vh;
+            width: 260px;
+            border-top-right-radius: 24px;
+            border-bottom-right-radius: 24px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-link-custom {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link-custom:hover, .nav-link-custom.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-link-custom i {
+            font-size: 1.2rem;
+        }
+
+        /* Основной контент */
+        .main-wrapper {
+            margin-left: 260px;
+            padding: 2.5rem 3rem;
+        }
+
+        /* Карточки сводки */
+        .summary-card {
+            background: white;
+            border-radius: var(--card-radius);
+            padding: 1.5rem;
+            box-shadow: 0px 8px 24px rgba(149, 157, 165, 0.08);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .summary-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0;
+        }
+
+        /* Транзакции */
+        .transaction-item {
+            background: white;
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.8rem;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.02);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.2s;
+        }
+
+        .transaction-item:hover {
+            background: #F8FAFC;
+        }
+
+        .tx-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background-color: #F1F5F9;
+            color: var(--text-muted);
+        }
+
+        .tx-amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* Аватарка */
+        .profile-avatar {
+            width: 44px;
+            height: 44px;
+            background-color: #FFA6A6;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* Мобильное нижнее меню */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0px -4px 24px rgba(0,0,0,0.06);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            padding: 0.5rem 1.5rem;
+            padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+            z-index: 1000;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-nav-item {
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            text-decoration: none;
+            padding: 10px;
+            transition: color 0.2s;
+        }
+
+        .mobile-nav-item.active {
+            color: var(--brand-color);
+        }
+
+        .fab-button {
+            width: 56px;
+            height: 56px;
+            background-color: var(--brand-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0px 8px 20px rgba(88, 80, 236, 0.3);
+            transform: translateY(-20px);
+            text-decoration: none;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .fab-button:hover {
+            color: white;
+            background-color: var(--brand-hover);
+            transform: translateY(-22px) scale(1.05);
+        }
+
+        /* Адаптив */
+        @media (max-width: 991px) {
+            .sidebar {
+                display: none;
+            }
+            .main-wrapper {
+                margin-left: 0;
+                padding: 1.5rem 1rem;
+                padding-bottom: 100px;
+            }
+            .mobile-nav {
+                display: flex;
+            }
+        }
+    </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand" href="#">ExpenseTracker</a>
-        <div class="ms-auto">
-            <span class="text-white me-3" th:text="${user.username}">Username</span>
 
-            <a th:href="@{/family}" class="btn btn-warning btn-sm me-2">Моя семья</a>
+<aside class="sidebar">
+    <a href="#" class="brand-logo">
+        <i class="bi bi-wallet2"></i> ExTrack
+    </a>
+    <nav class="d-flex flex-column flex-grow-1">
+        <a th:href="@{/}" class="nav-link-custom active">
+            <i class="bi bi-grid-fill"></i> Главная
+        </a>
 
-            <a th:href="@{/accounts}" class="btn btn-success btn-sm me-2">Счета и Переводы</a>
+        <a th:href="@{/accounts}" class="nav-link-custom">
+            <i class="bi bi-credit-card-fill"></i> Счета и Карты
+        </a>
+        <a th:href="@{/family}" class="nav-link-custom">
+            <i class="bi bi-people-fill"></i> Моя семья
+        </a>
+        <a th:href="@{/categories}" class="nav-link-custom">
+            <i class="bi bi-tags-fill"></i> Категории
+        </a>
 
-            <a th:href="@{/categories}"
-               class="btn btn-outline-light btn-sm me-2">Категории</a>
-
-            <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')"
-               th:href="@{/profile}"
-               class="btn btn-outline-light btn-sm me-2">Профиль</a>
-
-            <a sec:authorize="hasRole('MANAGER')"
-               th:href="@{/manager/users}"
-               class="btn btn-outline-light btn-sm me-2">Пользователи</a>
-
-            <form method="post" th:action="@{/logout}" class="d-inline">
-                <button class="btn btn-outline-light btn-sm">Выйти</button>
+        <div class="mt-auto">
+            <a sec:authorize="hasRole('MANAGER')" th:href="@{/manager/users}" class="nav-link-custom mb-2 bg-dark bg-opacity-25">
+                <i class="bi bi-shield-lock-fill"></i> Пользователи
+            </a>
+            <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')" th:href="@{/profile}" class="nav-link-custom">
+                <i class="bi bi-gear-fill"></i> Настройки
+            </a>
+            <form method="post" th:action="@{/logout}" class="mt-2">
+                <button type="submit" class="nav-link-custom w-100 border-0 text-start" style="background: transparent;">
+                    <i class="bi bi-box-arrow-right"></i> Выйти
+                </button>
             </form>
         </div>
-    </div>
-</nav>
+    </nav>
+</aside>
 
-<div class="container mt-4">
+<main class="main-wrapper">
+
+    <header class="d-flex justify-content-between align-items-center mb-4 mb-lg-5">
+        <h2 class="fw-bold m-0" style="color: #11142D;">Обзор финансов</h2>
+        <div class="d-flex align-items-center gap-3">
+            <div class="d-none d-sm-block text-end">
+                <div class="fw-semibold text-dark lh-1" th:text="${user.username}">Имя Пользователя</div>
+                <small class="text-muted" style="font-size: 0.8rem;">Добро пожаловать</small>
+            </div>
+            <div class="profile-avatar">
+                <i class="bi bi-person"></i>
+            </div>
+        </div>
+    </header>
 
     <div sec:authorize="hasAnyRole('OWNER', 'CLIENT')">
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card bg-success text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="card-title opacity-75">Доходы за месяц</h5>
-                        <h2 th:text="${totalIncome != null ? totalIncome : '0.00'} + ' BYN'">0.00 BYN</h2>
-                    </div>
+        <div class="row g-3 mb-5">
+            <div class="col-12 col-md-4">
+                <div class="summary-card">
+                    <div class="summary-title">Текущий баланс</div>
+                    <h3 class="summary-value" style="color: var(--brand-color);">Общая сводка</h3>
+                    <small class="text-muted mt-2"><i class="bi bi-info-circle"></i> За текущий месяц</small>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card bg-danger text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="card-title opacity-75">Расходы за месяц</h5>
-                        <h2 th:text="${totalExpense != null ? totalExpense : '0.00'} + ' BYN'">0.00 BYN</h2>
-                    </div>
+            <div class="col-6 col-md-4">
+                <div class="summary-card">
+                    <div class="summary-title">Общий доход</div>
+                    <h3 class="summary-value" th:text="${totalIncome != null ? totalIncome : '0.00'} + ' BYN'">$1,550.00</h3>
+                    <small class="text-success mt-2 fw-medium"><i class="bi bi-arrow-up-right"></i> Зачисления</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="summary-card">
+                    <div class="summary-title">Общие расходы</div>
+                    <h3 class="summary-value" th:text="${totalExpense != null ? totalExpense : '0.00'} + ' BYN'">$5,210.00</h3>
+                    <small class="text-danger mt-2 fw-medium"><i class="bi bi-arrow-down-right"></i> Траты</small>
                 </div>
             </div>
         </div>
 
-        <h4>Мои транзакции</h4>
-        <a th:href="@{/transactions/new}"
-           class="btn btn-success mb-3">+ Добавить расход</a>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold m-0">Последние транзакции</h5>
+            <a th:href="@{/transactions/new}" class="btn btn-sm" style="color: var(--brand-color); background: rgba(88, 80, 236, 0.1); border-radius: 8px; font-weight: 600;">
+                <i class="bi bi-plus-lg d-none d-md-inline"></i> Все
+            </a>
+        </div>
 
-        <table class="table table-striped bg-white shadow-sm rounded">
-            <thead>
-            <tr>
-                <th>Дата</th>
-                <th>Категория</th>
-                <th>Описание</th>
-                <th>Сумма</th>
-                <th>Попутчики</th>
-                <th>Действия</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="t : ${transactions}">
-                <td th:text="${#temporals.format(t.createdAt, 'dd.MM.yyyy HH:mm')}"></td>
-                <td th:text="${t.category != null ? t.category.name : (t.type.name() == 'INCOME' ? 'Доход (Пополнение)' : 'Перевод')}">Категория</td>
-                <td th:text="${t.description}"></td>
-                <td th:classappend="${t.type.name() == 'INCOME'} ? 'text-success fw-bold' : 'text-danger'"
-                    th:text="${t.type.name() == 'INCOME' ? '+' : '-'} + ${t.amount} + ' BYN'">Сумма
-                </td>
-                <td>
-                    <span th:each="c, i : ${t.companions}">
-                        <span th:text="${c.username}"></span>
-                        <span th:if="${!i.last}">, </span>
-                    </span>
-                </td>
-                <td>
-                    <a th:href="@{/transactions/edit/{id}(id=${t.id})}"
-                       class="btn btn-sm btn-warning">Изменить</a>
-                    <form method="post"
-                          th:action="@{/transactions/delete/{id}(id=${t.id})}"
-                          class="d-inline">
-                        <button class="btn btn-sm btn-danger">Удалить</button>
-                    </form>
-                </td>
-            </tr>
-            <tr th:if="${transactions == null or transactions.isEmpty()}">
-                <td colspan="6" class="text-center text-muted py-3">Транзакций пока нет</td>
-            </tr>
-            </tbody>
-        </table>
+        <div class="transactions-list">
+            <div th:if="${transactions == null or transactions.isEmpty()}" class="text-center py-5 bg-white rounded-4 shadow-sm">
+                <i class="bi bi-receipt text-muted" style="font-size: 3rem;"></i>
+                <h6 class="mt-3 text-muted">Транзакций пока нет</h6>
+            </div>
+
+            <div th:each="t : ${transactions}" class="transaction-item">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="tx-icon">
+                        <i th:class="${t.type.name() == 'INCOME'} ? 'bi bi-arrow-down-circle-fill text-success' : 'bi bi-bag-fill text-dark'"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1 fw-bold text-dark" th:text="${t.description}">Описание транзакции</h6>
+                        <div class="d-flex align-items-center gap-2" style="font-size: 0.85rem;">
+                            <span class="text-muted" th:text="${#temporals.format(t.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span>
+                            <span class="text-muted">•</span>
+                            <span class="text-muted" th:text="${t.category != null ? t.category.name : (t.type.name() == 'INCOME' ? 'Доход' : 'Перевод')}">Категория</span>
+                        </div>
+                        <div th:if="${t.companions != null and !t.companions.isEmpty()}" class="text-muted mt-1" style="font-size: 0.75rem;">
+                            <i class="bi bi-people-fill me-1"></i>
+                            <span th:each="c, i : ${t.companions}">
+                                    <span th:text="${c.username}"></span><span th:if="${!i.last}">, </span>
+                                </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                        <span class="tx-amount"
+                              th:classappend="${t.type.name() == 'INCOME'} ? 'text-success' : 'text-dark'"
+                              th:text="${t.type.name() == 'INCOME' ? '+' : '-'} + ${t.amount} + ' BYN'">
+                        </span>
+
+                    <div class="dropdown d-none d-md-block">
+                        <button class="btn btn-sm btn-light border-0 rounded-circle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" style="border-radius: 12px;">
+                            <li>
+                                <a class="dropdown-item py-2" th:href="@{/transactions/edit/{id}(id=${t.id})}">
+                                    <i class="bi bi-pencil me-2 text-muted"></i>Изменить
+                                </a>
+                            </li>
+                            <li>
+                                <form method="post" th:action="@{/transactions/delete/{id}(id=${t.id})}">
+                                    <button type="submit" class="dropdown-item py-2 text-danger">
+                                        <i class="bi bi-trash me-2"></i>Удалить
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div sec:authorize="hasRole('MANAGER')" class="text-center py-5">
-        <div class="card shadow-sm p-5 bg-white border-0">
+    <div sec:authorize="hasRole('MANAGER')" class="text-center py-5 mt-4">
+        <div class="card shadow-sm p-4 p-md-5 bg-white border-0" style="border-radius: 24px;">
             <div class="mb-4">
-                <span style="font-size: 4rem;">🛠️</span>
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 80px; height: 80px; background-color: rgba(88, 80, 236, 0.1); color: var(--brand-color);">
+                    <i class="bi bi-shield-lock-fill" style="font-size: 2.5rem;"></i>
+                </div>
             </div>
-            <h1 class="fw-bold">Панель администратора</h1>
-            <p class="text-muted fs-5">Добро пожаловать в систему управления расходами.<br>
-                Используйте быстрые ссылки ниже или верхнее меню для работы.</p>
+            <h2 class="fw-bold mb-3">Панель администратора</h2>
+            <p class="text-muted fs-6 mx-auto mb-5" style="max-width: 500px;">
+                Добро пожаловать в систему управления расходами. Используйте инструменты ниже для контроля за семьями, категориями и валютами.
+            </p>
 
-            <div class="d-flex justify-content-center gap-3 mt-4">
-                <a th:href="@{/family}" class="btn btn-primary btn-lg px-4">Управление семьями</a>
-                <a th:href="@{/accounts}" class="btn btn-success btn-lg px-4">Валюты системы</a>
-                <a th:href="@{/categories}" class="btn btn-info text-white btn-lg px-4">Системные категории</a>
+            <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+                <a th:href="@{/family}" class="btn py-3 px-4 fw-semibold" style="background-color: #F8FAFC; color: #334155; border: 1px solid #E2E8F0; border-radius: 12px;">
+                    <i class="bi bi-people text-primary fs-5 d-block mb-2"></i> Управление семьями
+                </a>
+                <a th:href="@{/accounts}" class="btn py-3 px-4 fw-semibold" style="background-color: #F8FAFC; color: #334155; border: 1px solid #E2E8F0; border-radius: 12px;">
+                    <i class="bi bi-currency-exchange text-success fs-5 d-block mb-2"></i> Валюты системы
+                </a>
+                <a th:href="@{/categories}" class="btn py-3 px-4 fw-semibold" style="background-color: #F8FAFC; color: #334155; border: 1px solid #E2E8F0; border-radius: 12px;">
+                    <i class="bi bi-tags text-info fs-5 d-block mb-2"></i> Системные категории
+                </a>
             </div>
         </div>
     </div>
 
-</div>
+</main>
+
+<nav class="mobile-nav d-lg-none">
+    <a th:href="@{/}" class="mobile-nav-item active">
+        <i class="bi bi-house-door-fill"></i>
+    </a>
+    <a th:href="@{/accounts}" class="mobile-nav-item">
+        <i class="bi bi-credit-card-fill"></i>
+    </a>
+
+    <a sec:authorize="hasAnyRole('OWNER', 'CLIENT')" th:href="@{/transactions/new}" class="fab-button">
+        <i class="bi bi-plus"></i>
+    </a>
+    <a sec:authorize="hasRole('MANAGER')" th:href="@{/manager/users}" class="fab-button">
+        <i class="bi bi-people-fill"></i>
+    </a>
+
+    <a th:href="@{/family}" class="mobile-nav-item">
+        <i class="bi bi-people"></i>
+    </a>
+    <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')" th:href="@{/profile}" class="mobile-nav-item">
+        <i class="bi bi-person-fill"></i>
+    </a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

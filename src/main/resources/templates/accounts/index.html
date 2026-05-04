@@ -1,60 +1,393 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Финансы и Валюты</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Счета и Карты - ExTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --brand-color: #5850EC;
+            --brand-hover: #463bce;
+            --bg-light: #F4F6F9;
+            --text-main: #2B2D42;
+            --text-muted: #8D99AE;
+            --card-radius: 20px;
+            --input-radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Десктопный сайдбар */
+        .sidebar {
+            background-color: var(--brand-color);
+            color: white;
+            min-height: 100vh;
+            width: 260px;
+            border-top-right-radius: 24px;
+            border-bottom-right-radius: 24px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-link-custom {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link-custom:hover, .nav-link-custom.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-link-custom i {
+            font-size: 1.2rem;
+        }
+
+        /* Основной контент */
+        .main-wrapper {
+            margin-left: 260px;
+            padding: 2.5rem 3rem;
+        }
+
+        /* Элементы UI */
+        .ui-card {
+            background: white;
+            border-radius: var(--card-radius);
+            border: none;
+            box-shadow: 0px 8px 24px rgba(149, 157, 165, 0.08);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Банковские карточки */
+        .account-card {
+            border-radius: 16px;
+            padding: 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0px 8px 20px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .account-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .account-card::after {
+            content: '';
+            position: absolute;
+            right: -20px;
+            bottom: -20px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .acc-positive {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        }
+
+        .acc-negative {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+        }
+
+        .acc-family {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        }
+
+        .acc-title {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .acc-balance {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0;
+            letter-spacing: -0.5px;
+        }
+
+        /* Элементы форм */
+        .form-label {
+            font-weight: 500;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: var(--input-radius);
+            padding: 0.7rem 1rem;
+            border: 1px solid #E2E8F0;
+            background-color: #F8FAFC;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: white;
+            border-color: var(--brand-color);
+            box-shadow: 0 0 0 4px rgba(88, 80, 236, 0.1);
+        }
+
+        .input-group-text {
+            background-color: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-top-left-radius: var(--input-radius);
+            border-bottom-left-radius: var(--input-radius);
+            color: var(--text-muted);
+        }
+
+        .input-group > .form-control, .input-group > .form-select {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .btn-brand {
+            background-color: var(--brand-color);
+            color: white;
+            border-radius: var(--input-radius);
+            padding: 0.7rem 1.2rem;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-brand:hover {
+            background-color: var(--brand-hover);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* Кастомная таблица для менеджера */
+        .table-custom {
+            margin-bottom: 0;
+        }
+        .table-custom th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #F1F5F9;
+            padding-bottom: 1rem;
+            border-top: none;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            border-bottom: 1px solid #F8FAFC;
+            padding: 1rem 0.5rem;
+        }
+
+        /* Аватарка в шапке */
+        .profile-avatar {
+            width: 44px;
+            height: 44px;
+            background-color: #FFA6A6;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* Мобильное нижнее меню */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0px -4px 24px rgba(0,0,0,0.06);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            padding: 0.5rem 1.5rem;
+            padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+            z-index: 1000;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-nav-item {
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            text-decoration: none;
+            padding: 10px;
+        }
+
+        .mobile-nav-item.active {
+            color: var(--brand-color);
+        }
+
+        .fab-button {
+            width: 56px;
+            height: 56px;
+            background-color: var(--brand-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0px 8px 20px rgba(88, 80, 236, 0.3);
+            transform: translateY(-20px);
+            text-decoration: none;
+        }
+
+        @media (max-width: 991px) {
+            .sidebar { display: none; }
+            .main-wrapper { margin-left: 0; padding: 1.5rem 1rem; padding-bottom: 100px; }
+            .mobile-nav { display: flex; }
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="#">ExpenseTracker</a>
-        <div class="ms-auto">
-            <a th:href="@{/dashboard}" class="btn btn-outline-light btn-sm me-2">На главную</a>
-            <a th:href="@{/family}" class="btn btn-warning btn-sm me-2">Моя семья</a>
+<aside class="sidebar">
+    <a href="#" class="brand-logo">
+        <i class="bi bi-wallet2"></i> ExTrack
+    </a>
+    <nav class="d-flex flex-column flex-grow-1">
+        <a th:href="@{/dashboard}" class="nav-link-custom">
+            <i class="bi bi-grid-fill"></i> Главная
+        </a>
+        <a th:href="@{/accounts}" class="nav-link-custom active">
+            <i class="bi bi-credit-card-fill"></i> Счета и Карты
+        </a>
+        <a th:href="@{/family}" class="nav-link-custom">
+            <i class="bi bi-people-fill"></i> Моя семья
+        </a>
+        <a th:href="@{/categories}" class="nav-link-custom">
+            <i class="bi bi-tags-fill"></i> Категории
+        </a>
+
+        <div class="mt-auto">
+            <a sec:authorize="hasRole('MANAGER')" th:href="@{/manager/users}" class="nav-link-custom mb-2">
+                <i class="bi bi-shield-lock-fill"></i> Пользователи
+            </a>
+            <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')" th:href="@{/profile}" class="nav-link-custom">
+                <i class="bi bi-gear-fill"></i> Настройки
+            </a>
+            <form method="post" th:action="@{/logout}" class="mt-2">
+                <button type="submit" class="nav-link-custom w-100 border-0 text-start" style="background: transparent;">
+                    <i class="bi bi-box-arrow-right"></i> Выйти
+                </button>
+            </form>
         </div>
+    </nav>
+</aside>
+
+<main class="main-wrapper">
+
+    <header class="d-flex justify-content-between align-items-center mb-4 mb-lg-5">
+        <div class="d-flex align-items-center gap-3">
+            <a th:href="@{/dashboard}" class="btn btn-light rounded-circle d-flex align-items-center justify-content-center border-0 shadow-sm d-lg-none" style="width: 40px; height: 40px;">
+                <i class="bi bi-arrow-left fs-5"></i>
+            </a>
+            <div>
+                <h2 class="fw-bold m-0" style="color: #11142D;" sec:authorize="hasAnyRole('OWNER', 'CLIENT')">Счета и Переводы</h2>
+                <h2 class="fw-bold m-0" style="color: #11142D;" sec:authorize="hasRole('MANAGER')">Валюты системы</h2>
+                <span class="text-muted d-none d-sm-block" style="font-size: 0.9rem;">Управление балансом и финансами</span>
+            </div>
+        </div>
+        <div class="d-none d-sm-flex align-items-center gap-3">
+            <div class="profile-avatar">
+                <i class="bi bi-person"></i>
+            </div>
+        </div>
+    </header>
+
+    <div th:if="${error}" class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-4" style="border-radius: 12px; background-color: #FEF2F2; color: #DC2626;">
+        <i class="bi bi-exclamation-triangle-fill fs-5 me-3"></i> <span th:text="${error}"></span>
     </div>
-</nav>
+    <div th:if="${success}" class="alert alert-success border-0 shadow-sm d-flex align-items-center mb-4" style="border-radius: 12px; background-color: #ECFDF5; color: #10B981;">
+        <i class="bi bi-check-circle-fill fs-5 me-3"></i> <span th:text="${success}"></span>
+    </div>
 
-<div class="container">
-    <h2 class="mb-4" sec:authorize="hasAnyRole('OWNER', 'CLIENT')">Управление финансами</h2>
-    <h2 class="mb-4" sec:authorize="hasRole('MANAGER')">Управление валютами системы</h2>
-
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-
-    <div class="row">
-        <div class="col-md-7">
+    <div class="row g-4">
+        <div class="col-xl-7 col-lg-6">
 
             <div sec:authorize="hasAnyRole('OWNER', 'CLIENT')">
-                <h4>Мои счета</h4>
-                <div class="row">
-                    <div class="col-md-6 mb-3" th:each="acc : ${myAccounts}">
-                        <div class="card shadow-sm" th:classappend="${acc.balance < 0} ? 'border-danger' : 'border-success'">
-                            <div class="card-body">
-                                <h5 class="card-title text-muted" th:text="${acc.name}">Название счета</h5>
-                                <h3 th:text="${acc.balance} + ' ' + ${acc.currency.code}"
-                                    th:classappend="${acc.balance < 0} ? 'text-danger' : 'text-success'">
-                                </h3>
-                                <div th:if="${acc.balance < 0}" class="alert alert-danger py-1 mt-2 mb-0" style="font-size: 0.8rem;">
-                                    ⚠️ Внимание: Баланс счета ушел в минус!
-                                </div>
+
+                <h5 class="fw-bold mb-3">Мои счета</h5>
+                <div class="row g-3 mb-5">
+                    <div class="col-md-6" th:each="acc : ${myAccounts}">
+                        <div class="account-card" th:classappend="${acc.balance < 0} ? 'acc-negative' : 'acc-positive'">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="acc-title" th:text="${acc.name}">Название счета</div>
+                                <i class="bi bi-wallet2 opacity-50 fs-4"></i>
+                            </div>
+                            <div class="acc-balance" th:text="${acc.balance} + ' ' + ${acc.currency.code}">0.00 USD</div>
+                            <div th:if="${acc.balance < 0}" class="mt-2 text-white bg-dark bg-opacity-25 rounded px-2 py-1" style="font-size: 0.75rem; width: fit-content;">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Отрицательный баланс!
                             </div>
                         </div>
                     </div>
+                    <div th:if="${myAccounts == null or myAccounts.isEmpty()}" class="col-12 text-muted mt-2">
+                        У вас пока нет счетов. Создайте новый в панели справа.
+                    </div>
                 </div>
 
-                <div th:if="${user.role.name() == 'OWNER' and familyAccounts != null and !familyAccounts.isEmpty()}" class="mt-4">
-                    <h4>Счета членов семьи</h4>
-                    <div class="row">
-                        <div class="col-md-6 mb-3" th:each="acc : ${familyAccounts}">
-                            <div class="card shadow-sm border-info bg-light">
-                                <div class="card-body">
-                                    <span class="badge bg-info text-dark float-end" th:text="${acc.user.username}"></span>
-                                    <h6 class="card-title text-muted" th:text="${acc.name}">Название</h6>
-                                    <h4 th:text="${acc.balance} + ' ' + ${acc.currency.code}" th:classappend="${acc.balance < 0} ? 'text-danger' : 'text-dark'"></h4>
+                <div th:if="${user.role.name() == 'OWNER' and familyAccounts != null and !familyAccounts.isEmpty()}">
+                    <h5 class="fw-bold mb-3 mt-4">Счета членов семьи</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6" th:each="acc : ${familyAccounts}">
+                            <div class="account-card acc-family">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <div class="acc-title mb-1" th:text="${acc.name}">Название</div>
+                                        <span class="badge bg-white text-primary rounded-pill" th:text="${acc.user.username}" style="font-size: 0.7rem;"></span>
+                                    </div>
+                                    <i class="bi bi-people-fill opacity-50 fs-4"></i>
                                 </div>
+                                <div class="acc-balance" th:text="${acc.balance} + ' ' + ${acc.currency.code}" th:classappend="${acc.balance < 0} ? 'text-warning'">0.00</div>
                             </div>
                         </div>
                     </div>
@@ -62,110 +395,176 @@
             </div>
 
             <div sec:authorize="hasRole('MANAGER')">
-                <h4>Существующие валюты</h4>
-                <table class="table table-hover bg-white shadow-sm rounded">
-                    <thead class="table-dark">
-                    <tr>
-                        <th>Код</th>
-                        <th>Название</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="curr : ${currencies}">
-                        <td class="fw-bold" th:text="${curr.code}">USD</td>
-                        <td th:text="${curr.name}">Доллар</td>
-                    </tr>
-                    </tbody>
-                </table>
+                <div class="ui-card">
+                    <h5 class="fw-bold mb-3">Существующие валюты</h5>
+                    <div class="table-responsive">
+                        <table class="table table-custom table-hover m-0">
+                            <thead>
+                            <tr>
+                                <th scope="col" style="width: 100px;">Код</th>
+                                <th scope="col">Название валюты</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="curr : ${currencies}">
+                                <td><span class="badge bg-light text-dark border fw-bold" th:text="${curr.code}">USD</span></td>
+                                <td class="fw-medium text-dark" th:text="${curr.name}">Доллар</td>
+                            </tr>
+                            <tr th:if="${currencies == null or currencies.isEmpty()}">
+                                <td colspan="2" class="text-center text-muted py-4">Валюты пока не добавлены</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
+
         </div>
 
-        <div class="col-md-5">
+        <div class="col-xl-5 col-lg-6">
 
-            <div sec:authorize="hasRole('MANAGER')" class="card shadow-sm mb-4 border-warning">
-                <div class="card-header bg-warning text-dark fw-bold">⚙️ Добавить новую валюту</div>
-                <div class="card-body bg-light">
-                    <form method="post" th:action="@{/accounts/currencies/add}">
-                        <input type="text" name="code" class="form-control mb-2" placeholder="Код (например, USD)" required maxlength="5" style="text-transform: uppercase;">
-                        <input type="text" name="name" class="form-control mb-2" placeholder="Название (например, Доллар США)" required>
-                        <button type="submit" class="btn btn-warning w-100 fw-bold">Добавить в систему</button>
-                    </form>
-                </div>
+            <div sec:authorize="hasRole('MANAGER')" class="ui-card border-top border-4 border-warning">
+                <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle-fill text-warning me-2"></i>Добавить валюту</h5>
+                <form method="post" th:action="@{/accounts/currencies/add}">
+                    <div class="mb-3">
+                        <label class="form-label">Код валюты</label>
+                        <input type="text" name="code" class="form-control" placeholder="Например: USD" required maxlength="5" style="text-transform: uppercase;">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Название валюты</label>
+                        <input type="text" name="name" class="form-control" placeholder="Например: Доллар США" required>
+                    </div>
+                    <button type="submit" class="btn btn-brand w-100"><i class="bi bi-check-lg me-1"></i>Добавить в систему</button>
+                </form>
             </div>
 
             <div sec:authorize="hasAnyRole('OWNER', 'CLIENT')">
 
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-dark text-white">Открыть новый счет</div>
-                    <div class="card-body">
-                        <form method="post" th:action="@{/accounts/create}">
-                            <input type="text" name="name" class="form-control mb-2" placeholder="Название (напр. Наличные)" required>
-                            <input type="number" step="0.01" name="initialBalance" class="form-control mb-2" placeholder="Начальный баланс (0.00)">
-                            <select name="currencyId" class="form-select mb-3" required>
-                                <option value="" disabled selected>Выберите валюту счета...</option>
-                                <option th:each="curr : ${currencies}" th:value="${curr.id}" th:text="${curr.code} + ' (' + ${curr.name} + ')'"></option>
-                            </select>
-                            <button type="submit" class="btn btn-dark w-100">Создать счет</button>
-                        </form>
-                    </div>
+                <div class="ui-card border-top border-4 border-primary">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-arrow-left-right text-primary me-2"></i>Перевод средств</h5>
+                    <form method="post" th:action="@{/accounts/transfer}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Откуда списать:</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-end-0"><i class="bi bi-wallet2 text-muted"></i></span>
+                                <select name="fromAccountId" class="form-select border-start-0" required>
+                                    <option value="" disabled selected th:if="${myAccounts.isEmpty()}">Нет счетов</option>
+                                    <option th:each="acc : ${myAccounts}" th:value="${acc.id}" th:text="${acc.name} + ' (' + ${acc.balance} + ' ' + ${acc.currency.code} + ')'"></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Куда зачислить:</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-end-0"><i class="bi bi-person-down text-muted"></i></span>
+                                <select name="toAccountId" class="form-select border-start-0" required>
+                                    <option value="" disabled selected>Выберите счет...</option>
+                                    <option th:each="acc : ${allFamilyAccounts}"
+                                            th:value="${acc.id}"
+                                            th:text="${acc.user.username == user.username ? 'Мой счет: ' : 'Семья (' + acc.user.username + '): '} + ${acc.name} + ' (' + ${acc.currency.code} + ')'">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-7">
+                                <label class="form-label">Сумма списания:</label>
+                                <input type="number" id="transferAmount" name="amount" class="form-control" step="0.01" placeholder="0.00" required>
+                            </div>
+                            <div class="col-5">
+                                <label class="form-label">Курс:</label>
+                                <input type="number" id="exchangeRate" name="exchangeRate" class="form-control" step="0.0001" value="1.0" required>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center bg-light rounded-3 p-2 mb-3 px-3 border">
+                            <span class="small text-muted fw-medium">К зачислению:</span>
+                            <span class="fw-bold text-success fs-5" id="resultAmount">0.00</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <input type="text" name="comment" class="form-control" placeholder="Комментарий (необязательно)">
+                        </div>
+
+                        <button type="submit" class="btn btn-brand w-100"><i class="bi bi-send-fill me-1"></i> Отправить перевод</button>
+                    </form>
                 </div>
 
-                <div class="card shadow-sm mb-4 border-success">
-                    <div class="card-header bg-success text-white">Добавить доход</div>
-                    <div class="card-body">
-                        <form method="post" th:action="@{/accounts/income}">
-                            <select name="accountId" class="form-select mb-2" required>
+                <div class="ui-card border-top border-4 border-success mt-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-arrow-down-circle-fill text-success me-2"></i>Пополнить баланс</h5>
+                    <form method="post" th:action="@{/accounts/income}">
+                        <div class="mb-3">
+                            <select name="accountId" class="form-select" required>
                                 <option value="" disabled selected>Выберите ваш счет...</option>
                                 <option th:each="acc : ${myAccounts}" th:value="${acc.id}" th:text="${acc.name} + ' (' + ${acc.balance} + ' ' + ${acc.currency.code} + ')'"></option>
                             </select>
-                            <input type="number" step="0.01" name="amount" class="form-control mb-2" placeholder="Сумма" required>
-                            <input type="text" name="source" class="form-control mb-2" placeholder="Откуда пришли" required>
-                            <button type="submit" class="btn btn-success w-100">Пополнить</button>
-                        </form>
-                    </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-5">
+                                <input type="number" step="0.01" name="amount" class="form-control" placeholder="Сумма" required>
+                            </div>
+                            <div class="col-7">
+                                <input type="text" name="source" class="form-control" placeholder="Откуда пришли (Зарплата)" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 fw-bold">Пополнить</button>
+                    </form>
                 </div>
 
-                <div class="card shadow-sm border-primary mb-5">
-                    <div class="card-header bg-primary text-white">Перевод средств</div>
-                    <div class="card-body">
-                        <form method="post" th:action="@{/accounts/transfer}">
-                            <label class="form-label small">Откуда списать:</label>
-                            <select name="fromAccountId" class="form-select mb-2" required>
-                                <option th:each="acc : ${myAccounts}" th:value="${acc.id}" th:text="${acc.name} + ' (' + ${acc.balance} + ' ' + ${acc.currency.code} + ')'"></option>
-                            </select>
-
-                            <label class="form-label small">Куда зачислить:</label>
-                            <select name="toAccountId" class="form-select mb-3" required>
-                                <option value="" disabled selected>Выберите счет получателя...</option>
-                                <option th:each="acc : ${allFamilyAccounts}"
-                                        th:value="${acc.id}"
-                                        th:text="${acc.user.username == user.username ? 'Мой счет: ' : 'Семья (' + acc.user.username + '): '} + ${acc.name} + ' (' + ${acc.currency.code} + ')'">
-                                </option>
-                            </select>
-
-                            <div class="mb-2">
-                                <label class="form-label small">Сумма списания:</label>
-                                <input type="number" id="transferAmount" name="amount" class="form-control" step="0.01" required>
+                <div class="ui-card border-top border-4 border-dark mt-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-plus-square-fill text-dark me-2"></i>Открыть новый счет</h5>
+                    <form method="post" th:action="@{/accounts/create}">
+                        <div class="mb-3">
+                            <input type="text" name="name" class="form-control" placeholder="Название (напр. Наличные, Копилка)" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-7">
+                                <select name="currencyId" class="form-select" required>
+                                    <option value="" disabled selected>Валюта...</option>
+                                    <option th:each="curr : ${currencies}" th:value="${curr.id}" th:text="${curr.code}"></option>
+                                </select>
                             </div>
-
-                            <div class="mb-2">
-                                <label class="form-label small">Курс конвертации:</label>
-                                <input type="number" id="exchangeRate" name="exchangeRate" class="form-control" step="0.0001" value="1.0" required>
+                            <div class="col-5">
+                                <input type="number" step="0.01" name="initialBalance" class="form-control" placeholder="Баланс">
                             </div>
-
-                            <div class="alert alert-info py-2 small">
-                                Будет зачислено: <strong id="resultAmount">0.00</strong>
-                            </div>
-
-                            <input type="text" name="comment" class="form-control mb-3" placeholder="Комментарий">
-                            <button type="submit" class="btn btn-primary w-100">Перевести</button>
-                        </form>
-                    </div>
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100 fw-bold">Создать счет</button>
+                    </form>
                 </div>
+
             </div>
         </div>
     </div>
-</div>
+
+</main>
+
+<nav class="mobile-nav d-lg-none">
+    <a th:href="@{/dashboard}" class="mobile-nav-item">
+        <i class="bi bi-house-door-fill"></i>
+    </a>
+    <a th:href="@{/accounts}" class="mobile-nav-item active">
+        <i class="bi bi-credit-card-fill"></i>
+    </a>
+
+    <a sec:authorize="hasAnyRole('OWNER', 'CLIENT')" th:href="@{/transactions/new}" class="fab-button">
+        <i class="bi bi-plus"></i>
+    </a>
+    <a sec:authorize="hasRole('MANAGER')" th:href="@{/manager/users}" class="fab-button">
+        <i class="bi bi-people-fill"></i>
+    </a>
+
+    <a th:href="@{/family}" class="mobile-nav-item">
+        <i class="bi bi-people"></i>
+    </a>
+    <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')" th:href="@{/profile}" class="mobile-nav-item">
+        <i class="bi bi-person-fill"></i>
+    </a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     const amountInput = document.getElementById('transferAmount');
@@ -183,6 +582,5 @@
     if (amountInput) amountInput.addEventListener('input', calculate);
     if (rateInput) rateInput.addEventListener('input', calculate);
 </script>
-
 </body>
 </html>

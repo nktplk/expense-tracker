@@ -3,77 +3,389 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Категории</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Категории - ExTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --brand-color: #5850EC;
+            --brand-hover: #463bce;
+            --bg-light: #F4F6F9;
+            --text-main: #2B2D42;
+            --text-muted: #8D99AE;
+            --card-radius: 20px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Десктопный сайдбар */
+        .sidebar {
+            background-color: var(--brand-color);
+            color: white;
+            min-height: 100vh;
+            width: 260px;
+            border-top-right-radius: 24px;
+            border-bottom-right-radius: 24px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-link-custom {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link-custom:hover, .nav-link-custom.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-link-custom i {
+            font-size: 1.2rem;
+        }
+
+        /* Основной контент */
+        .main-wrapper {
+            margin-left: 260px;
+            padding: 2.5rem 3rem;
+        }
+
+        /* Кнопка Бренд */
+        .btn-brand {
+            background-color: var(--brand-color);
+            color: white;
+            border-radius: 12px;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-brand:hover {
+            background-color: var(--brand-hover);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(88, 80, 236, 0.2);
+        }
+
+        /* Элементы UI */
+        .ui-card {
+            background: white;
+            border-radius: var(--card-radius);
+            border: none;
+            box-shadow: 0px 8px 24px rgba(149, 157, 165, 0.08);
+            padding: 1.5rem;
+        }
+
+        /* Кастомная таблица */
+        .table-custom {
+            margin-bottom: 0;
+        }
+        .table-custom th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #F1F5F9;
+            padding-bottom: 1rem;
+            border-top: none;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            border-bottom: 1px solid #F8FAFC;
+            padding: 1.2rem 0.5rem;
+        }
+        .table-custom tbody tr:hover {
+            background-color: #F8FAFC;
+        }
+
+        /* Кастомный прогресс бар */
+        .progress-thin {
+            height: 6px;
+            background-color: #F1F5F9;
+            border-radius: 4px;
+            overflow: visible;
+        }
+        .progress-thin .progress-bar {
+            border-radius: 4px;
+        }
+
+        /* Мобильное нижнее меню */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0px -4px 24px rgba(0,0,0,0.06);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            padding: 0.5rem 1.5rem;
+            padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+            z-index: 1000;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-nav-item {
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            text-decoration: none;
+            padding: 10px;
+            transition: color 0.2s;
+        }
+
+        .mobile-nav-item.active {
+            color: var(--brand-color);
+        }
+
+        .fab-button {
+            width: 56px;
+            height: 56px;
+            background-color: var(--brand-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0px 8px 20px rgba(88, 80, 236, 0.3);
+            transform: translateY(-20px);
+            text-decoration: none;
+        }
+
+        /* Адаптив */
+        @media (max-width: 991px) {
+            .sidebar {
+                display: none;
+            }
+            .main-wrapper {
+                margin-left: 0;
+                padding: 1.5rem 1rem;
+                padding-bottom: 100px;
+            }
+            .mobile-nav {
+                display: flex;
+            }
+            .ui-card {
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
-<body class="bg-light">
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Категории</h3>
-        <div>
-            <a th:href="@{/dashboard}" class="btn btn-secondary">← Назад</a>
-            <a th:href="@{/categories/new}" class="btn btn-success">+ Новая категория</a>
+<body>
+
+<aside class="sidebar">
+    <a href="#" class="brand-logo">
+        <i class="bi bi-wallet2"></i> ExTrack
+    </a>
+    <nav class="d-flex flex-column flex-grow-1">
+        <a th:href="@{/dashboard}" class="nav-link-custom">
+            <i class="bi bi-grid-fill"></i> Главная
+        </a>
+        <a th:href="@{/accounts}" class="nav-link-custom">
+            <i class="bi bi-credit-card-fill"></i> Счета и Карты
+        </a>
+        <a th:href="@{/family}" class="nav-link-custom">
+            <i class="bi bi-people-fill"></i> Моя семья
+        </a>
+        <a th:href="@{/categories}" class="nav-link-custom active">
+            <i class="bi bi-tags-fill"></i> Категории
+        </a>
+
+        <div class="mt-auto">
+            <a sec:authorize="hasRole('MANAGER')" th:href="@{/manager/users}" class="nav-link-custom mb-2">
+                <i class="bi bi-shield-lock-fill"></i> Пользователи
+            </a>
+            <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')" th:href="@{/profile}" class="nav-link-custom">
+                <i class="bi bi-gear-fill"></i> Настройки
+            </a>
+            <form method="post" th:action="@{/logout}" class="mt-2">
+                <button type="submit" class="nav-link-custom w-100 border-0 text-start" style="background: transparent;">
+                    <i class="bi bi-box-arrow-right"></i> Выйти
+                </button>
+            </form>
+        </div>
+    </nav>
+</aside>
+
+<main class="main-wrapper">
+
+    <header class="d-flex justify-content-between align-items-center mb-4 mb-lg-5">
+        <div class="d-flex align-items-center gap-3">
+            <a th:href="@{/dashboard}" class="btn btn-light rounded-circle d-flex align-items-center justify-content-center border-0 shadow-sm d-lg-none" style="width: 40px; height: 40px;">
+                <i class="bi bi-arrow-left fs-5"></i>
+            </a>
+            <div>
+                <h2 class="fw-bold m-0" style="color: #11142D;">Категории</h2>
+                <span class="text-muted d-none d-sm-block" style="font-size: 0.9rem;">Управление категориями расходов и лимитами</span>
+            </div>
+        </div>
+        <a th:href="@{/categories/new}" class="btn btn-brand d-none d-lg-flex align-items-center gap-2">
+            <i class="bi bi-plus-lg"></i> Новая категория
+        </a>
+    </header>
+
+    <div class="ui-card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover table-custom">
+                <thead>
+                <tr>
+                    <th scope="col">Название</th>
+                    <th scope="col">Тип</th>
+                    <th scope="col" sec:authorize="hasRole('MANAGER')">Лимит по умолчанию</th>
+                    <th scope="col" sec:authorize="!hasRole('MANAGER')">Лимит</th>
+                    <th scope="col" sec:authorize="!hasRole('MANAGER')" class="d-none d-sm-table-cell">Потрачено</th>
+                    <th scope="col" sec:authorize="!hasRole('MANAGER')" style="width: 30%;">Статус (за месяц)</th>
+                    <th scope="col" class="text-end">Действия</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="cat : ${categories}">
+
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-3 bg-light text-muted" style="width: 40px; height: 40px;">
+                                <i th:classappend="${cat.owner == null} ? 'bi-bookmark-star-fill' : 'bi-folder-fill'"></i>
+                            </div>
+                            <span class="fw-bold text-dark" style="font-size: 1.05rem;" th:text="${cat.name}"></span>
+                        </div>
+                    </td>
+
+                    <td>
+                        <span class="badge rounded-pill fw-semibold py-1 px-2" style="background-color: #F1F5F9; color: #64748B;" th:if="${cat.owner == null}">Системная</span>
+                        <span class="badge rounded-pill fw-semibold py-1 px-2" style="background-color: rgba(88, 80, 236, 0.1); color: var(--brand-color);" th:if="${cat.owner != null}">Личная</span>
+                    </td>
+
+                    <td sec:authorize="hasRole('MANAGER')">
+                        <span class="fw-medium text-dark" th:text="${cat.monthlyLimit != null ? cat.monthlyLimit + ' BYN' : 'Без лимита'}"></span>
+                    </td>
+
+                    <td sec:authorize="!hasRole('MANAGER')" th:with="actualLimit=${cat.owner == null and user.family != null and user.family.customLimits.containsKey(cat) ? user.family.customLimits.get(cat) : cat.monthlyLimit}">
+                        <span class="fw-medium text-dark" th:text="${actualLimit != null ? actualLimit + ' BYN' : 'Без лимита'}"></span>
+                        <span th:if="${cat.owner == null and user.family != null and user.family.customLimits.containsKey(cat)}" class="badge bg-info bg-opacity-10 text-info py-1 px-2 ms-1 rounded-pill" title="Установлен семейный лимит">
+                                    <i class="bi bi-people-fill"></i> Семья
+                                </span>
+                    </td>
+
+                    <td sec:authorize="!hasRole('MANAGER')" class="d-none d-sm-table-cell">
+                        <span class="fw-medium" th:text="${spentMap.getOrDefault(cat.id, 0)} + ' BYN'"></span>
+                    </td>
+
+                    <td sec:authorize="!hasRole('MANAGER')" th:with="actualLimit=${cat.owner == null and user.family != null and user.family.customLimits.containsKey(cat) ? user.family.customLimits.get(cat) : cat.monthlyLimit}, percent=${percentMap.get(cat.id)}">
+
+                        <div th:if="${actualLimit != null}" class="w-100 mt-1 pe-md-3">
+                            <div class="d-flex justify-content-between mb-2" style="font-size: 0.8rem;">
+                                <span class="text-muted d-sm-none">Потрачено: <span th:text="${spentMap.getOrDefault(cat.id, 0)} + ' BYN'"></span></span>
+                                <span class="text-muted d-none d-sm-inline">Использовано</span>
+                                <span class="fw-bold"
+                                      th:classappend="${percent >= 100} ? 'text-danger' : (${percent >= 80} ? 'text-warning' : 'text-success')"
+                                      th:text="${percent} + '%'">
+                                        </span>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar"
+                                     th:classappend="${percent >= 100} ? 'bg-danger' : (${percent >= 80} ? 'bg-warning' : 'bg-success')"
+                                     role="progressbar"
+                                     th:style="'width: ' + (${percent > 100} ? 100 : percent) + '%;'">
+                                </div>
+                            </div>
+                        </div>
+                        <span th:if="${actualLimit == null}" class="text-muted small"><i class="bi bi-infinity"></i> Лимит не задан</span>
+                    </td>
+
+                    <td class="text-end">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light border-0 rounded-circle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" style="border-radius: 12px;">
+                                <li>
+                                    <a class="dropdown-item py-2" th:href="@{/categories/edit/{id}(id=${cat.id})}">
+                                        <i class="bi bi-pencil me-2 text-muted"></i>Изменить
+                                    </a>
+                                </li>
+                                <li th:if="${cat.owner != null or user.role.name() == 'MANAGER'}">
+                                    <form method="post" th:action="@{/categories/delete/{id}(id=${cat.id})}">
+                                        <button type="submit" class="dropdown-item py-2 text-danger" onclick="return confirm('Вы уверены, что хотите удалить эту категорию?')">
+                                            <i class="bi bi-trash me-2"></i>Удалить
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr th:if="${categories == null or categories.isEmpty()}">
+                    <td th:colspan="${#authorization.expression('hasRole(''MANAGER'')') ? 4 : 6}" class="text-center py-5 text-muted">
+                        <i class="bi bi-tags fs-1 d-block mb-2"></i>
+                        У вас пока нет доступных категорий
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <table class="table table-hover bg-white shadow-sm rounded">
-        <thead class="table-dark">
-        <tr>
-            <th>Название</th>
-            <th>Тип</th>
-            <th sec:authorize="hasRole('MANAGER')">Лимит по умолчанию</th>
-            <th sec:authorize="!hasRole('MANAGER')">Лимит</th>
+</main>
 
-            <th sec:authorize="!hasRole('MANAGER')">Потрачено</th>
-            <th sec:authorize="!hasRole('MANAGER')" style="width: 25%;">Статус (за месяц)</th>
+<nav class="mobile-nav d-lg-none">
+    <a th:href="@{/dashboard}" class="mobile-nav-item">
+        <i class="bi bi-house-door-fill"></i>
+    </a>
+    <a th:href="@{/accounts}" class="mobile-nav-item">
+        <i class="bi bi-credit-card-fill"></i>
+    </a>
 
-            <th>Действия</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="cat : ${categories}">
-            <td class="fw-bold" th:text="${cat.name}"></td>
+    <a th:href="@{/categories/new}" class="fab-button">
+        <i class="bi bi-plus"></i>
+    </a>
 
-            <td>
-                <span class="badge bg-secondary" th:if="${cat.owner == null}">Системная</span>
-                <span class="badge bg-primary" th:if="${cat.owner != null}">Личная</span>
-            </td>
+    <a th:href="@{/categories}" class="mobile-nav-item active">
+        <i class="bi bi-tags-fill"></i>
+    </a>
+    <a sec:authorize="hasAnyRole('OWNER', 'MANAGER')" th:href="@{/profile}" class="mobile-nav-item">
+        <i class="bi bi-person-fill"></i>
+    </a>
+</nav>
 
-            <td sec:authorize="hasRole('MANAGER')">
-                <span th:text="${cat.monthlyLimit != null ? cat.monthlyLimit + ' BYN' : 'Без лимита'}"></span>
-            </td>
-
-            <td sec:authorize="!hasRole('MANAGER')" th:with="actualLimit=${cat.owner == null and user.family != null and user.family.customLimits.containsKey(cat) ? user.family.customLimits.get(cat) : cat.monthlyLimit}">
-                <span th:text="${actualLimit != null ? actualLimit + ' BYN' : 'Без лимита'}"></span>
-                <span th:if="${cat.owner == null and user.family != null and user.family.customLimits.containsKey(cat)}" class="badge bg-info text-dark ms-1">Семья</span>
-            </td>
-
-            <td sec:authorize="!hasRole('MANAGER')" th:text="${spentMap.getOrDefault(cat.id, 0)} + ' BYN'"></td>
-
-            <td sec:authorize="!hasRole('MANAGER')" th:with="actualLimit=${cat.owner == null and user.family != null and user.family.customLimits.containsKey(cat) ? user.family.customLimits.get(cat) : cat.monthlyLimit}, percent=${percentMap.get(cat.id)}">
-                <div th:if="${actualLimit != null}" class="progress mt-1" style="height: 20px;">
-                    <div class="progress-bar fw-bold"
-                         th:classappend="${percent >= 100} ? 'bg-danger' : (${percent >= 80} ? 'bg-warning text-dark' : 'bg-success')"
-                         role="progressbar"
-                         th:style="'width: ' + (${percent > 100} ? 100 : percent) + '%;'"
-                         th:text="${percent} + '%'">
-                    </div>
-                </div>
-                <span th:if="${actualLimit == null}" class="text-muted small">Нет лимита</span>
-            </td>
-
-            <td>
-                <div class="d-flex">
-                    <a th:href="@{/categories/edit/{id}(id=${cat.id})}" class="btn btn-warning btn-sm me-2">Изменить</a>
-                    <form method="post" th:action="@{/categories/delete/{id}(id=${cat.id})}"
-                          th:if="${cat.owner != null or user.role.name() == 'MANAGER'}">
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Удалить категорию?')">Удалить</button>
-                    </form>
-                </div>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
