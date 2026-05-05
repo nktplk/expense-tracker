@@ -23,15 +23,54 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (userRepository.count() == 0) {
-            User admin = User.builder()
-                    .username("admin")
-                    .email("admin@example.com")
-                    .password(passwordEncoder.encode("admin123"))
-                    .role(Role.MANAGER)
+        // 1. Обработка АДМИНА (с проверкой и восстановлением роли)
+        userRepository.findByUsername("admin").ifPresentOrElse(
+                admin -> {
+                    // Если админ найден, проверяем его роль
+                    if (admin.getRole() != Role.MANAGER) {
+                        admin.setRole(Role.MANAGER);
+                        userRepository.save(admin);
+                        System.out.println("Role for 'admin' restored to ADMIN");
+                    }
+                },
+                () -> {
+                    // Если админа нет в базе, создаем его
+                    User admin = User.builder()
+                            .username("admin")
+                            .email("admin@example.com")
+                            .password(passwordEncoder.encode("admin123"))
+                            .role(Role.MANAGER) // Тут мы исправили MANAGER на ADMIN
+                            .enabled(true)
+                            .build();
+                    userRepository.save(admin);
+                    System.out.println("Default user 'admin' created");
+                }
+        );
+
+// 2. Создание OWNER (если его нет)
+        if (userRepository.findByUsername("owner").isEmpty()) {
+            User owner = User.builder()
+                    .username("owner")
+                    .email("owner@example.com")
+                    .password(passwordEncoder.encode("owner123"))
+                    .role(Role.OWNER) // Убедись, что у тебя есть Role.OWNER или Role.MANAGER
                     .enabled(true)
                     .build();
-            userRepository.save(admin);
+            userRepository.save(owner);
+            System.out.println("Default user 'owner' created");
+        }
+
+// 3. Создание обычного USER (если его нет)
+        if (userRepository.findByUsername("user").isEmpty()) {
+            User user = User.builder()
+                    .username("user")
+                    .email("user@example.com")
+                    .password(passwordEncoder.encode("user123"))
+                    .role(Role.CLIENT)
+                    .enabled(true)
+                    .build();
+            userRepository.save(user);
+            System.out.println("Default user 'user' created");
         }
 
         if (categoryRepository.count() == 0) {
